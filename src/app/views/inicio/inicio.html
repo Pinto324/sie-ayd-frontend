@@ -1,0 +1,31 @@
+<!-- inicio.component.html -->
+<div class="min-h-screen bg-gray-100">
+
+
+  <main class="container mx-auto px-4 py-8">
+    <section class="text-center mb-12">
+      <h1 class="text-4xl font-bold text-gray-800 mb-4">Bienvenido a Mi App</h1>
+      <p class="text-xl text-gray-600">La mejor solución para tus necesidades</p>
+    </section>
+
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+      <!-- Login Form -->
+      <div>
+        <app-login
+          (loginSubmit)="onLoginSubmit($event)">
+        </app-login>
+      </div>
+
+      <!-- Información -->
+      <div class="text-center lg:text-left">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">¿Por qué elegirnos?</h2>
+        <ul class="text-gray-600 space-y-2">
+          <li>✔️ Fácil de usar</li>
+          <li>✔️ Seguro y confiable</li>
+          <li>✔️ Soporte 24/7</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+</div>

@@ -1,0 +1,8 @@
+/* Puedes agregar estilos personalizados si necesitas */
+button {
+  display: inline-block;
+}
+
+button.w-full {
+  display: block;
+}
