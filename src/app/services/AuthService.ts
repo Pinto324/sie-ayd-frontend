@@ -1,30 +1,41 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
-export interface LoginData {
+export interface User {
+  id: string;
   email: string;
-  password: string;
+  role: UserRole;
+  name: string;
 }
+
+export type UserRole = 'admin' | 'moderator' | 'user';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'https://api.tudominio.com/auth';
+  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
-
-  login(credentials: LoginData): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, credentials);
+  login(credentials: any): void {
+    // Lógica de login... luego:
+    const user: User = {
+      id: '1',
+      email: credentials.email,
+      role: this.determineRole(credentials.email), // Lógica para determinar rol
+      name: 'Usuario Ejemplo'
+    };
+    this.currentUserSubject.next(user);
   }
 
   logout(): void {
-    // Lógica de logout
+    this.currentUserSubject.next(null);
   }
 
-  isLoggedIn(): boolean {
-    // Verificar si está autenticado
-    return false;
+  private determineRole(email: string): UserRole {
+    // Lógica para determinar el rol (puede ser desde API)
+    if (email.includes('admin')) return 'admin';
+    if (email.includes('mod')) return 'moderator';
+    return 'user';
   }
 }

@@ -11,19 +11,9 @@
     <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
       <!-- Login Form -->
       <div>
-        <app-login
-          (loginSubmit)="onLoginSubmit($event)">
-        </app-login>
-      </div>
-
-      <!-- Información -->
-      <div class="text-center lg:text-left">
-        <h2 class="text-2xl font-bold text-gray-800 mb-4">¿Por qué elegirnos?</h2>
-        <ul class="text-gray-600 space-y-2">
-          <li>✔️ Fácil de usar</li>
-          <li>✔️ Seguro y confiable</li>
-          <li>✔️ Soporte 24/7</li>
-        </ul>
+        @if (isLogin) {
+          <app-login (loginSubmit)="onLoginSubmit($event)"></app-login>
+        }
       </div>
     </section>
   </main>

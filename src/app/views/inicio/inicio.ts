@@ -10,7 +10,7 @@ import { Login } from '../../components/features/auth/login/login';
 })
 export class Inicio {
  constructor(private authService: Auth) {}
-
+  isLogin = false;
   onLoginSubmit(credentials: LoginData) {
     this.authService.login(credentials).subscribe({
       next: (response) => {
