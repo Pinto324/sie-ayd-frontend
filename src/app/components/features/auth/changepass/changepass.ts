@@ -2,14 +2,14 @@ import { Component } from '@angular/core';
 import { InputComponent } from '../../../shared/input/input';
 import { ButtonComponent } from '../../../shared/button/button';
 import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+
 @Component({
-  selector: 'app-verifycode',
-  standalone: true,
+  selector: 'app-changepass',
   imports: [InputComponent, ButtonComponent],
-  templateUrl: './verifycode.html',
-  styleUrl: './verifycode.css'
+  templateUrl: './changepass.html',
+  styleUrl: './changepass.css'
 })
-export class Verifycode {
+export class Changepass {
   resetForm: FormGroup;
   isLoading = false;
   constructor(private fb: FormBuilder) {

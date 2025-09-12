@@ -10,17 +10,17 @@
                 <form (ngSubmit)="onSubmit()" class="space-y-4">
                     <!-- Código de verificación -->
                     <app-input label="Ingresa el código de verificación" type="text" [control]="verificationCodeControl"
-                        placeholder="123456" [required]="true" [error]="getVerificationCodeError()">
+                        placeholder="123456"  [error]="getVerificationCodeError()">
                     </app-input>
 
                     <!-- Nueva contraseña -->
                     <app-input label="Nueva contraseña" type="password" [control]="newPasswordControl"
-                        placeholder="••••••" [required]="true" [error]="getNewPasswordError()">
+                        placeholder="••••••"  [error]="getNewPasswordError()">
                     </app-input>
 
                     <!-- Confirmar contraseña -->
                     <app-input label="Confirmar contraseña" type="password" [control]="confirmPasswordControl"
-                        placeholder="••••••" [required]="true" [error]="getConfirmPasswordError()">
+                        placeholder="••••••" [error]="getConfirmPasswordError()">
                     </app-input>
 
                     <!-- Botón de enviar -->

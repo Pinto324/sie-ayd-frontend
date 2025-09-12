@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { Inicio } from './views/inicio/inicio';
 import { Login } from './components/features/auth/login/login'; // Asegúrate de importar tu componente de login
 import { Register } from './components/features/auth/register/register';
+import { Verifycode } from './components/features/auth/verifycode/verifycode';
+import { Changepass } from './components/features/auth/changepass/changepass';
 export const routes: Routes = [
   // Ruta para la página de inicio, que muestra el componente InicioComponent
   { path: '', component: Inicio },
@@ -11,6 +13,9 @@ export const routes: Routes = [
 
   { path: 'register', component: Register },
 
+  { path: 'verifycode', component: Verifycode },
+
+  { path: 'changepass', component: Changepass },
   // Opcional: una ruta comodín para cualquier otra URL no reconocida
   { path: '**', redirectTo: '' }
 ];
