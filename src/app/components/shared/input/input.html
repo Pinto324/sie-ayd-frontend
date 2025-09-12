@@ -1,0 +1,26 @@
+<div class="w-full">
+    <!-- Label -->
+    @if (label && showLabel) {
+    <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+        {{ label }}
+        @if (required) {
+        <span class="text-red-500">*</span>
+        }
+    </label>
+    }
+
+    <!-- Input Container -->
+    <div class="relative">
+        <!-- Input Field -->
+        <input [type]="type" [placeholder]="placeholder" [disabled]="disabled" [class]="getInputClasses()"
+            [formControl]="control"
+        (focus)="onFocus()"
+        (blur)="onBlur()"
+        />
+    </div>
+
+    <!-- Error Message -->
+    @if (error) {
+    <p class="mt-1 text-sm text-red-600">{{ error }}</p>
+    }
+</div>
