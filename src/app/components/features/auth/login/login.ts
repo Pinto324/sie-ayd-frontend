@@ -3,10 +3,11 @@ import { FormBuilder, FormGroup, Validators, FormControl, ReactiveFormsModule } 
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '../../../shared/button/button';
 import { InputComponent } from '../../../shared/input/input';
+import { RouterModule } from '@angular/router';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, InputComponent, ReactiveFormsModule],
+  imports: [CommonModule, ButtonComponent, InputComponent, ReactiveFormsModule, RouterModule],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
@@ -57,12 +58,11 @@ export class Login {
     return '';
   }
 
-  get emailControl(): FormControl {
-    return this.loginForm.get('email') as FormControl;
-  }
-
   get passwordControl(): FormControl {
     return this.loginForm.get('password') as FormControl;
   }
 
+  get emailControl(): FormControl {
+    return this.loginForm.get('email') as FormControl;
+  }
 }
