@@ -1,23 +1,38 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, NgZone, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '../../../shared/button/button';
 import { InputComponent } from '../../../shared/input/input';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { catchError, finalize } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { AuthService } from '../../../../services/auth';
+
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, ButtonComponent, InputComponent, ReactiveFormsModule, RouterModule],
   templateUrl: './login.html',
-  styleUrl: './login.css'
+  styleUrl: './login.css',
+  changeDetection: ChangeDetectionStrategy.OnPush // 👈 Opcional: mejor rendimiento
 })
 export class Login {
   loginForm: FormGroup;
   isLoading = false;
+  loginError: string | null = null;
 
   @Output() loginSubmit = new EventEmitter<{ email: string, password: string }>();
 
-  constructor(private fb: FormBuilder) {
+  private apiUrl = 'http://147.135.215.156:8090/api/v1/auth/login';
+
+  constructor(
+    private fb: FormBuilder,
+    private http: HttpClient,
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService
+  ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
@@ -25,14 +40,50 @@ export class Login {
   }
 
   onSubmit() {
+    this.loginError = null;
+
     if (this.loginForm.valid) {
       this.isLoading = true;
-      this.loginSubmit.emit(this.loginForm.value);
+      this.cdr.markForCheck(); // 👈 Marca para verificación en el próximo ciclo
 
-      // Reset loading state after simulation (en realidad lo haría el servicio)
-      setTimeout(() => {
-        this.isLoading = false;
-      }, 1000);
+      const credentials = this.loginForm.value;
+      this.loginSubmit.emit(credentials);
+
+      this.http.post(this.apiUrl, credentials, { observe: 'response' })
+        .pipe(
+          finalize(() => {
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          }),
+          catchError((error: HttpErrorResponse) => {
+
+            if (error.status === 500) {
+              this.loginError = 'Email o contraseña incorrectos. Por favor, inténtalo de nuevo.';
+            } else if (error.status === 0) {
+              this.loginError = 'Error de conexión. Verifica tu conexión a internet.';
+            } else {
+              this.loginError = 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo.';
+            }
+
+            this.cdr.markForCheck(); // 👈 Marca para verificación inmediata
+
+            return of(null);
+          })
+        )
+        .subscribe((response: any) => {
+          if (response && response.status === 200) {
+            const authToken = response.headers.get('Authorization');
+            if (authToken) {
+              // Usa el servicio para guardar los datos
+              this.authService.storeUserData(authToken, response.body);
+              console.log(this.authService.getUserId());
+              //this.router.navigate(['/dashboard']);
+            } else {
+              this.loginError = 'Ocurrió un problema al autenticar.';
+              this.cdr.markForCheck();
+            }
+          }
+        });
     }
   }
 
