@@ -84,4 +84,26 @@ export class AuthService {
     }
     return null;
   }
+  isLoggedIn(): boolean {
+    return this.getToken() !== null && this.getUserData() !== null;
+  }
+
+  // Método para verificar si el token es válido (opcional)
+  isTokenValid(): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+
+    // Aquí puedes añadir lógica para verificar expiración del token
+    // si tu JWT incluye timestamp de expiración
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.exp && Date.now() >= payload.exp * 1000) {
+        this.logout(); // Token expirado, hacer logout automático
+        return false;
+      }
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
 }
