@@ -5,6 +5,7 @@ import { Register } from './components/features/auth/register/register';
 import { Verifycode } from './components/features/auth/verifycode/verifycode';
 import { Changepass } from './components/features/auth/changepass/changepass';
 import { Recoverpass } from './components/features/auth/recoverpass/recoverpass';
+import { Dashboard } from './components/features/dashboard/dashboard';
 export const routes: Routes = [
   // Ruta para la página de inicio, que muestra el componente InicioComponent
   { path: '', component: Inicio },
@@ -19,6 +20,7 @@ export const routes: Routes = [
   { path: 'changepass', component: Changepass },
 
   { path: 'recoverpass', component: Recoverpass },
+  { path: 'dashboard', component: Dashboard },
   // Opcional: una ruta comodín para cualquier otra URL no reconocida
   { path: '**', redirectTo: '' }
 ];

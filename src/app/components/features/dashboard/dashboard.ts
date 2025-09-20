@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth';
+import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faUsers, faBuilding, faUserTie, faChartBar, faCog, faFileAlt } from '@fortawesome/free-solid-svg-icons';
 interface ModuleCard {
   id: number;
   title: string;
@@ -13,7 +15,7 @@ interface ModuleCard {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FontAwesomeModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
 })
@@ -22,7 +24,13 @@ export class Dashboard implements OnInit {
   userRoleId: number | null = null;
   filteredModules: ModuleCard[] = [];
 
-  constructor(private authService: AuthService) { }
+  constructor(
+    private authService: AuthService,
+    private library: FaIconLibrary
+  ) {
+    // Agregar iconos a la librería
+    library.addIcons(faUsers, faBuilding, faUserTie, faChartBar, faCog, faFileAlt);
+  }
 
   ngOnInit() {
     this.userRoleId = this.authService.getRoleId();
@@ -36,7 +44,7 @@ export class Dashboard implements OnInit {
         id: 1,
         title: 'Módulo de Usuarios',
         description: 'Gestiona los usuarios del sistema, crea, edita y elimina cuentas de usuario.',
-        icon: '👥',
+        icon: 'users',
         route: '/users',
         roleAccess: [1, 2] // Roles 1 y 2 pueden acceder
       },
@@ -44,7 +52,7 @@ export class Dashboard implements OnInit {
         id: 2,
         title: 'Módulo de Sucursales',
         description: 'Administra las sucursales de la empresa, sus datos y configuración.',
-        icon: '🏢',
+        icon: 'building',
         route: '/branches',
         roleAccess: [1, 3] // Roles 1 y 3 pueden acceder
       },
@@ -52,7 +60,7 @@ export class Dashboard implements OnInit {
         id: 3,
         title: 'Módulo de Trabajadores',
         description: 'Controla la información de los trabajadores y sus asignaciones.',
-        icon: '👨‍💼',
+        icon: 'user-tie',
         route: '/workers',
         roleAccess: [1] // Solo rol 1 puede acceder
       },
@@ -60,7 +68,7 @@ export class Dashboard implements OnInit {
         id: 4,
         title: 'Módulo de Reportes',
         description: 'Genera reportes y estadísticas del sistema.',
-        icon: '📊',
+        icon: 'id-card-clip',
         route: '/reports',
         roleAccess: [1, 2]
       },
@@ -68,16 +76,8 @@ export class Dashboard implements OnInit {
         id: 5,
         title: 'Módulo de Configuración',
         description: 'Configuración general del sistema y preferencias.',
-        icon: '⚙️',
+        icon: 'gear',
         route: '/settings',
-        roleAccess: [1]
-      },
-      {
-        id: 6,
-        title: 'Módulo de Auditoría',
-        description: 'Registros de actividades y auditoría del sistema.',
-        icon: '📝',
-        route: '/audit',
         roleAccess: [1]
       }
     ];

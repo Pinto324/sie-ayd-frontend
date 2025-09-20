@@ -77,7 +77,7 @@ export class Login {
               // Usa el servicio para guardar los datos
               this.authService.storeUserData(authToken, response.body);
               console.log(this.authService.getUserId());
-              //this.router.navigate(['/dashboard']);
+              this.router.navigate(['/dashboard']);
             } else {
               this.loginError = 'Ocurrió un problema al autenticar.';
               this.cdr.markForCheck();

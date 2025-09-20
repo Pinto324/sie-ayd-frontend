@@ -1,10 +1,10 @@
 <div class="container mx-auto px-4 py-8">
     <!-- Header -->
     <div class="text-center mb-12">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-black mb-4">
             Panel de Control
         </h1>
-        <p class="text-gray-600 dark:text-gray-300">
+        <p class="text-gray-600 font-bold dark:text-gray-300">
             Bienvenido al sistema de gestión. Selecciona un módulo para comenzar.
         </p>
     </div>
@@ -18,8 +18,8 @@
                 class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow-sm p-6 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors duration-200 h-full">
 
                 <!-- Icono -->
-                <div class="text-5xl mb-4 text-blue-600 dark:text-blue-400">
-                    {{ module.icon }}
+                <div class="text-4xl mb-4 text-blue-600 dark:text-blue-400">
+                    <fa-icon [icon]="['fas', module.icon]"></fa-icon>
                 </div>
 
                 <!-- Contenido -->
