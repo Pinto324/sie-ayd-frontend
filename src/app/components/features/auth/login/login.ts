@@ -72,15 +72,14 @@ export class Login {
         )
         .subscribe((response: any) => {
           if (response && response.status === 200) {
+            if (response.body.use2fa) {
+                  this.router.navigate(['/verifycode']);
+                }
             if (response.body.user.active) {
               const authToken = response.headers.get('Authorization');
               if (authToken) {
                 this.authService.storeUserData(authToken, response.body);
-                if (response.body.use2fa) {
-                  this.router.navigate(['/verifycode']);
-                } else {
                   this.router.navigate(['/dashboard']);
-                }
               } else {
                 this.loginError = 'Ocurrió un problema al autenticar.';
                 this.cdr.markForCheck();

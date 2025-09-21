@@ -8,6 +8,9 @@
                 </h1>
 
                 <form (ngSubmit)="onSubmit()" class="space-y-4">
+                        <app-input label="Correo electrónico" type="email" [control]="emailControl"
+                            placeholder="tu@email.com" [error]="getEmailError()">
+                        </app-input>
                     <!-- Código de verificación -->
                     <app-input label="Ingresa el código de verificación" type="text" [control]="verificationCodeControl"
                         placeholder="123456" [required]="true" [error]="getVerificationCodeError()">

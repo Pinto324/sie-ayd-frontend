@@ -21,6 +21,7 @@ interface User {
 interface Role {
   id: number;
   name: string;
+  description: string;
 }
 interface ApiResponse {
   content: User[];
