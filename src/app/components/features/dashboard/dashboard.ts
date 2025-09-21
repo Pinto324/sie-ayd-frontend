@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faUsers, faBuilding, faUserTie, faChartBar, faCog, faFileAlt } from '@fortawesome/free-solid-svg-icons';
+import { faUsers, faBuilding, faUserTie, faChartBar, faCog, faFileAlt, faDumpster, faIdCardClip } from '@fortawesome/free-solid-svg-icons';
 interface ModuleCard {
   id: number;
   title: string;
@@ -29,7 +29,7 @@ export class Dashboard implements OnInit {
     private library: FaIconLibrary
   ) {
     // Agregar iconos a la librería
-    library.addIcons(faUsers, faBuilding, faUserTie, faChartBar, faCog, faFileAlt);
+    library.addIcons(faUsers, faBuilding, faUserTie, faChartBar, faCog, faFileAlt, faDumpster, faIdCardClip);
   }
 
   ngOnInit() {
@@ -46,7 +46,7 @@ export class Dashboard implements OnInit {
         description: 'Gestiona los usuarios del sistema, crea, edita y elimina cuentas de usuario.',
         icon: 'users',
         route: '/ModuloUsuario',
-        roleAccess: [1, 2] // Roles 1 y 2 pueden acceder
+        roleAccess: [1] // Roles 1 y 2 pueden acceder
       },
       {
         id: 2,
@@ -54,7 +54,7 @@ export class Dashboard implements OnInit {
         description: 'Administra las sucursales de la empresa, sus datos y configuración.',
         icon: 'building',
         route: '/branches',
-        roleAccess: [1, 3] // Roles 1 y 3 pueden acceder
+        roleAccess: [1] // Roles 1 y 3 pueden acceder
       },
       {
         id: 3,
@@ -66,6 +66,14 @@ export class Dashboard implements OnInit {
       },
       {
         id: 4,
+        title: 'Módulo de Comercio',
+        description: 'Controla la información de los comercios.',
+        icon: 'dumpster',
+        route: '/commerce',
+        roleAccess: [1]
+      },
+      {
+        id: 5,
         title: 'Módulo de Reportes',
         description: 'Genera reportes y estadísticas del sistema.',
         icon: 'id-card-clip',
@@ -73,7 +81,7 @@ export class Dashboard implements OnInit {
         roleAccess: [1, 2]
       },
       {
-        id: 5,
+        id: 6,
         title: 'Módulo de Configuración',
         description: 'Configuración general del sistema y preferencias.',
         icon: 'gear',
