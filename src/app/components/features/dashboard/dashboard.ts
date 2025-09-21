@@ -45,7 +45,7 @@ export class Dashboard implements OnInit {
         title: 'Módulo de Usuarios',
         description: 'Gestiona los usuarios del sistema, crea, edita y elimina cuentas de usuario.',
         icon: 'users',
-        route: '/users',
+        route: '/ModuloUsuario',
         roleAccess: [1, 2] // Roles 1 y 2 pueden acceder
       },
       {
