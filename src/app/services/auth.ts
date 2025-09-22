@@ -35,6 +35,16 @@ export class AuthService {
     this.currentUserSubject.next(userData.user);
   }
 
+  storeUserDatafa(token: string, userData: any): void {
+    if (this.isBrowser()) {
+      localStorage.setItem('jwt_token', token);
+      localStorage.setItem('user_id', userData.id.toString());
+      localStorage.setItem('role_id', userData.role.id.toString());
+      localStorage.setItem('user_data', JSON.stringify(userData));
+    }
+    this.currentUserSubject.next(userData);
+  }
+
   getUserId(): number | null {
     if (this.isBrowser()) {
       const userId = localStorage.getItem('user_id');

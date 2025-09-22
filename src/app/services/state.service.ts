@@ -1,0 +1,17 @@
+// services/state.service.ts
+import { Injectable } from '@angular/core';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class StateService {
+  private email: string = '';
+
+  setEmail(email: string) {
+    this.email = email;
+  }
+
+  getEmail(): string {
+    return this.email;
+  }
+}

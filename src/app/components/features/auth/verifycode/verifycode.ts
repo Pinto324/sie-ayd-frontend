@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -7,7 +7,7 @@ import { of } from 'rxjs';
 import { AuthService } from '../../../../services/auth';
 import { InputComponent } from '../../../shared/input/input';
 import { ButtonComponent } from '../../../shared/button/button';
-
+import { StateService } from '../../../../services/state.service';
 @Component({
   selector: 'app-verifycode',
   standalone: true,
@@ -15,7 +15,7 @@ import { ButtonComponent } from '../../../shared/button/button';
   templateUrl: './verifycode.html',
   styleUrl: './verifycode.css'
 })
-export class Verifycode {
+export class Verifycode implements OnInit {
   resetForm: FormGroup;
   isLoading = false;
   verificationError: string | null = null;
@@ -25,14 +25,21 @@ export class Verifycode {
     private fb: FormBuilder,
     private http: HttpClient,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private stateService: StateService 
   ) {
     this.resetForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      email: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
       verificationCode: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]]
     });
   }
-
+ngOnInit(): void {
+  const email = this.stateService.getEmail();
+  console.log(email);
+    if (email) {
+      this.emailControl.setValue(email);
+    }
+  }
   // Getter para el control del código de verificación
   get verificationCodeControl(): FormControl {
     return this.resetForm.get('verificationCode') as FormControl;
@@ -55,11 +62,10 @@ export class Verifycode {
 
   onSubmit() {
     this.verificationError = null;
-
     if (this.resetForm.valid) {
       this.isLoading = true;
-
-      const { email, verificationCode } = this.resetForm.value;
+      const email = this.emailControl.value;
+      const verificationCode = this.verificationCodeControl.value;
       const verificationData = {
         email: email,
         code: verificationCode
@@ -82,10 +88,11 @@ export class Verifycode {
           })
         )
         .subscribe((response: any) => {
+          console.log(response);
           if (response && response.status === 200) {
             const authToken = response.headers.get('Authorization');
             if (authToken) {
-              this.authService.storeUserData(authToken, response.body);
+              this.authService.storeUserDatafa(authToken, response.body);
               this.router.navigate(['/dashboard']);
             } else {
               this.verificationError = 'Ocurrió un problema al autenticar.';

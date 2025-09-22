@@ -1,0 +1,89 @@
+<!-- filter-radios.component.html -->
+<div class="w-full max-w-4xl mx-auto">
+  <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6 text-center">Selecciona tu filtro</h2>
+  
+  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+    <!-- Radio Group -->
+    <div class="flex flex-wrap justify-center gap-4">
+      <!-- Opción 1: Todos -->
+      <div class="radio-option flex-grow">
+        <input [(ngModel)]="selectedFilter" (change)="onFilterChange()" type="radio" id="filter-option-1" name="filter-options" value="todos" class="hidden peer">
+        <label for="filter-option-1" class="flex flex-col items-center justify-between w-full h-full text-gray-500 bg-white border-2 border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:border-blue-500 peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700 transition-all duration-200">
+          <div class="flex flex-col items-center text-center">
+            <i class="fas fa-list text-2xl mb-2"></i>
+            <div class="text-lg font-semibold">Sollicitudes</div>
+          </div>
+          <i class="fas fa-check-circle text-lg mt-2 opacity-0 peer-checked:opacity-100 text-blue-600 dark:text-blue-500"></i>
+        </label>
+      </div>
+      
+      <!-- Opción 2: Activos -->
+      <div class="radio-option flex-grow">
+        <input [(ngModel)]="selectedFilter" (change)="onFilterChange()" type="radio" id="filter-option-2" name="filter-options" value="activos" class="hidden peer">
+        <label for="filter-option-2" class="flex flex-col items-center justify-between w-full h-full text-gray-500 bg-white border-2 border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:border-blue-500 peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700 transition-all duration-200">
+          <div class="flex flex-col items-center text-center">
+            <i class="fas fa-check-circle text-2xl mb-2"></i>
+            <div class="text-lg font-semibold">Sucursales</div>
+          </div>
+          <i class="fas fa-check-circle text-lg mt-2 opacity-0 peer-checked:opacity-100 text-blue-600 dark:text-blue-500"></i>
+        </label>
+      </div>
+      
+      <!-- Opción 3: Pendientes -->
+      <div hidden class="radio-option flex-grow">
+        <input [(ngModel)]="selectedFilter" (change)="onFilterChange()" type="radio" id="filter-option-3" name="filter-options" value="pendientes" class="hidden peer">
+        <label for="filter-option-3" class="flex flex-col items-center justify-between w-full h-full p-4 text-gray-500 bg-white border-2 border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:border-blue-500 peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700 transition-all duration-200">
+          <div class="flex flex-col items-center text-center">
+            <i class="fas fa-clock text-2xl mb-2"></i>
+            <div class="text-lg font-semibold">Pendientes</div>
+            <div class="text-sm mt-1">Elementos pendientes</div>
+          </div>
+          <i class="fas fa-check-circle text-lg mt-2 opacity-0 peer-checked:opacity-100 text-blue-600 dark:text-blue-500"></i>
+        </label>
+      </div>
+      
+      <!-- Opción 4: Completados -->
+      <div hidden class="radio-option flex-grow">
+        <input [(ngModel)]="selectedFilter" (change)="onFilterChange()" type="radio" id="filter-option-4" name="filter-options" value="completados" class="hidden peer">
+        <label for="filter-option-4" class="flex flex-col items-center justify-between w-full h-full p-4 text-gray-500 bg-white border-2 border-gray-200 rounded-lg cursor-pointer dark:hover:text-gray-300 dark:border-gray-700 dark:peer-checked:border-blue-500 peer-checked:border-blue-600 peer-checked:text-blue-600 hover:text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:bg-gray-800 dark:hover:bg-gray-700 transition-all duration-200">
+          <div class="flex flex-col items-center text-center">
+            <i class="fas fa-check-double text-2xl mb-2"></i>
+            <div class="text-lg font-semibold">Completados</div>
+            <div class="text-sm mt-1">Elementos finalizados</div>
+          </div>
+          <i class="fas fa-check-circle text-lg mt-2 opacity-0 peer-checked:opacity-100 text-blue-600 dark:text-blue-500"></i>
+        </label>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Componentes que se muestran según la selección -->
+  <div class="mt-8 grid grid-cols-1 gap-6">
+    <!-- Componente Todos -->
+      @if(showTodos){
+     <app-solicitud>
+                </app-solicitud>
+    }
+    @if(showActivos){
+    <div  class="component bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+      <h3 class="text-xl font-bold text-green-600 dark:text-green-400 mb-4">Componente Activos</h3>
+      <p class="text-gray-700 dark:text-gray-300">Este componente muestra solo los elementos activos.</p>
+      <div class="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+        <p class="text-sm text-green-700 dark:text-green-400">Contenido específico del componente "Activos"</p>
+      </div>
+      <app-comercios >
+                </app-comercios>
+    </div>
+    }
+
+    @if(showPendientes){
+    <!-- Componente Pendientes -->
+    <div class="component bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
+      <h3 class="text-xl font-bold text-yellow-600 dark:text-yellow-400 mb-4">Componente Pendientes</h3>
+      <p class="text-gray-700 dark:text-gray-300">Este componente muestra los elementos pendientes.</p>
+      <div class="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+        <p class="text-sm text-yellow-700 dark:text-yellow-400">Contenido específico del componente "Pendientes"</p>
+      </div>
+    </div>
+}
+</div>

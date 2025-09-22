@@ -6,23 +6,19 @@
                 <h1 class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
                     Verificación de 2 pasos
                 </h1>
-
-                <form (ngSubmit)="onSubmit()" class="space-y-4">
-                        <app-input label="Correo electrónico" type="email" [control]="emailControl"
+                <form [formGroup]="resetForm" (ngSubmit)="onSubmit()" class="space-y-4">
+                        <app-input hidden label="Correo electrónico" type="email" [control]="emailControl"
                             placeholder="tu@email.com" [error]="getEmailError()">
                         </app-input>
-                    <!-- Código de verificación -->
                     <app-input label="Ingresa el código de verificación" type="text" [control]="verificationCodeControl"
-                        placeholder="123456" [required]="true" [error]="getVerificationCodeError()">
+                        placeholder="123456"  [error]="getVerificationCodeError()">
                     </app-input>
 
-                    <!-- Botón de enviar -->
                     <app-button type="submit" text="Verificar" variant="primary" [fullWidth]="true"
                         [loading]="isLoading">
                     </app-button>
                 </form>
 
-                <!-- Enlace para reenviar código -->
                 <div class="text-center mt-4">
                     <p class="text-sm text-gray-600 dark:text-gray-400">
                         ¿No recibiste el código?

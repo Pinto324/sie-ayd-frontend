@@ -8,7 +8,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { AuthService } from '../../../../services/auth';
-
+import { StateService } from '../../../../services/state.service';
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -31,7 +31,8 @@ export class Login {
     private http: HttpClient,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private authService: AuthService
+    private authService: AuthService,
+    private stateService: StateService
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -57,9 +58,9 @@ export class Login {
           }),
           catchError((error: HttpErrorResponse) => {
 
-            if (error.status === 500) {
+            if (error.status === 401) {
               this.loginError = 'Email o contraseña incorrectos. Por favor, inténtalo de nuevo.';
-            } else if (error.status === 0) {
+            } else if (error.status === 500) {
               this.loginError = 'Error de conexión. Verifica tu conexión a internet.';
             } else {
               this.loginError = 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo.';
@@ -73,6 +74,7 @@ export class Login {
         .subscribe((response: any) => {
           if (response && response.status === 200) {
             if (response.body.use2fa) {
+              this.stateService.setEmail(credentials.email);
                   this.router.navigate(['/verifycode']);
                 }
             if (response.body.user.active) {

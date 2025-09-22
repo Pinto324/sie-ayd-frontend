@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faUsers, faBuilding, faUserTie, faChartBar, faCog, faFileAlt, faDumpster, faIdCardClip } from '@fortawesome/free-solid-svg-icons';
+import { faUsers, faBuilding, faUserTie, faChartBar, faCog, faFileAlt, faDumpster, faIdCardClip, faBoxesStacked } from '@fortawesome/free-solid-svg-icons';
 interface ModuleCard {
   id: number;
   title: string;
@@ -29,7 +29,7 @@ export class Dashboard implements OnInit {
     private library: FaIconLibrary
   ) {
     // Agregar iconos a la librería
-    library.addIcons(faUsers, faBuilding, faUserTie, faChartBar, faCog, faFileAlt, faDumpster, faIdCardClip);
+    library.addIcons(faUsers, faBuilding, faUserTie, faChartBar, faCog, faFileAlt, faDumpster, faIdCardClip,faBoxesStacked);
   }
 
   ngOnInit() {
@@ -52,8 +52,8 @@ export class Dashboard implements OnInit {
         id: 2,
         title: 'Módulo de Sucursales',
         description: 'Administra las sucursales de la empresa, sus datos y configuración.',
-        icon: 'building',
-        route: '/branches',
+        icon: 'dumpster',
+        route: '/ModuloSucursal',
         roleAccess: [1] // Roles 1 y 3 pueden acceder
       },
       {
@@ -87,6 +87,22 @@ export class Dashboard implements OnInit {
         icon: 'gear',
         route: '/settings',
         roleAccess: [1]
+      },
+      {
+        id: 7,
+        title: 'Paquetes',
+        description: 'Todas la información y configuraciones del estado de tu paquete!.',
+        icon: 'boxes-stacked',
+        route: '/settings',
+        roleAccess: [5]
+      },
+      {
+        id: 8,
+        title: 'Afilación',
+        description: 'Quieres afiliar tu empresa con nuestro servicio de paquetes? manda una solicitud acá!.',
+        icon: 'dumpster',
+        route: '/settings',
+        roleAccess: [5]
       }
     ];
   }
