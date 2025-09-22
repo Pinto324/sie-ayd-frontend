@@ -101,7 +101,7 @@ export class Dashboard implements OnInit {
         title: 'Afilación',
         description: 'Quieres afiliar tu empresa con nuestro servicio de paquetes? manda una solicitud acá!.',
         icon: 'dumpster',
-        route: '/settings',
+        route: '/afilacion',
         roleAccess: [5]
       }
     ];

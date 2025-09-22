@@ -8,6 +8,7 @@ import { Recoverpass } from './components/features/auth/recoverpass/recoverpass'
 import { Dashboard } from './components/features/dashboard/dashboard';
 import { Usuarios } from './views/admin/usuarios/usuarios';
 import { Sucursal } from './views/admin/sucursal/sucursal';
+import { Afilacion } from './views/cliente/afilacion/afilacion';
 import { AuthGuard } from './services/auth.guard';
 import { AdminGuard } from './services/adminguard';
 
@@ -23,6 +24,10 @@ export const routes: Routes = [
   { 
     path: 'dashboard', 
     component: Dashboard, 
+    canActivate: [AuthGuard] 
+  },{ 
+    path: 'afilacion', 
+    component: Afilacion, 
     canActivate: [AuthGuard] 
   },
   

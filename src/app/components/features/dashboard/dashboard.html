@@ -1,55 +1,57 @@
-<div class="container mx-auto px-4 py-8">
-    <!-- Header -->
-    <div class="text-center mb-12">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-black mb-4">
-            Panel de Control
-        </h1>
-        <p class="text-gray-600 font-bold dark:text-gray-300">
-            Bienvenido al sistema de gestión. Selecciona un módulo para comenzar.
-        </p>
-    </div>
+<section class="min-h-screen w-full bg-gray-50 dark:bg-gray-900 py-8">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                Panel de Control
+            </h1>
+            <p class="text-gray-600 font-bold dark:text-gray-300">
+                Bienvenido al sistema de gestión. Selecciona un módulo para comenzar.
+            </p>
+        </div>
 
-    <!-- Grid de Módulos -->
-    <div class="space-y-8">
-        @for (moduleGroup of getModuleGroups(); track $index) {
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @for (module of moduleGroup; track module.id) {
-            <a [routerLink]="module.route"
-                class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow-sm p-6 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors duration-200 h-full">
+        <!-- Grid de Módulos -->
+        <div class="space-y-8">
+            @for (moduleGroup of getModuleGroups(); track $index) {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @for (module of moduleGroup; track module.id) {
+                <a [routerLink]="module.route"
+                    class="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow-sm p-6 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors duration-200 h-full">
 
-                <!-- Icono -->
-                <div class="text-4xl mb-4 text-blue-600 dark:text-blue-400">
-                    <fa-icon [icon]="['fas', module.icon]"></fa-icon>
-                </div>
+                    <!-- Icono -->
+                    <div class="text-4xl mb-4 text-blue-600 dark:text-blue-400">
+                        <fa-icon [icon]="['fas', module.icon]"></fa-icon>
+                    </div>
 
-                <!-- Contenido -->
-                <div class="text-center flex flex-col flex-grow">
-                    <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
-                        {{ module.title }}
-                    </h5>
-                    <p class="mb-3 font-normal text-gray-700 dark:text-gray-400 flex-grow">
-                        {{ module.description }}
-                    </p>
-                    <span class="text-sm text-blue-600 dark:text-blue-400 font-medium mt-auto">
-                        Acceder al módulo →
-                    </span>
-                </div>
-            </a>
+                    <!-- Contenido -->
+                    <div class="text-center flex flex-col flex-grow">
+                        <h5 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+                            {{ module.title }}
+                        </h5>
+                        <p class="mb-3 font-normal text-gray-700 dark:text-gray-400 flex-grow">
+                            {{ module.description }}
+                        </p>
+                        <span class="text-sm text-blue-600 dark:text-blue-400 font-medium mt-auto">
+                            Acceder al módulo →
+                        </span>
+                    </div>
+                </a>
+                }
+            </div>
             }
+        </div>
+
+        <!-- Mensaje si no hay módulos -->
+        @if (filteredModules.length === 0) {
+        <div class="text-center py-12">
+            <div class="text-6xl mb-4">🔒</div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                No tienes módulos disponibles
+            </h3>
+            <p class="text-gray-600 dark:text-gray-300">
+                Contacta al administrador para obtener acceso a los módulos del sistema.
+            </p>
         </div>
         }
     </div>
-
-    <!-- Mensaje si no hay módulos -->
-    @if (filteredModules.length === 0) {
-    <div class="text-center py-12">
-        <div class="text-6xl mb-4">🔒</div>
-        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            No tienes módulos disponibles
-        </h3>
-        <p class="text-gray-600 dark:text-gray-300">
-            Contacta al administrador para obtener acceso a los módulos del sistema.
-        </p>
-    </div>
-    }
-</div>
+</section>
