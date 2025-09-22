@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { AuthService, UserRole } from '../../../services/AuthService';
+import { RouterModule, Router } from '@angular/router';
+import { AuthService } from '../../../services/auth'; // Ajusta la ruta
+import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-navbar',
   standalone: true,
@@ -9,35 +10,39 @@ import { AuthService, UserRole } from '../../../services/AuthService';
   templateUrl: './navbar.html',
   styleUrl: './navbar.css'
 })
-export class Navbar {
- isLoggedIn = false;
-  userRole: UserRole  | null = null;
-  userEmail: string | null = null;
-
-  constructor(private authService: AuthService) {}
+export class Navbar implements OnInit, OnDestroy {
+  isLoggedIn = false;
+  private authSubscription!: Subscription;
+  isLoggingOut = false;
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) { }
 
   ngOnInit() {
-    this.authService.currentUser$.subscribe(user => {
-      this.isLoggedIn = !!user;
-      this.userRole = user?.role || null;
-      this.userEmail = user?.email || null;
-    });
+    // Suscribirse a los cambios del estado de autenticación
+    this.authSubscription = this.authService.currentUser$.subscribe(
+      user => {
+        this.isLoggedIn = !!user;
+      }
+    );
+
+    // Verificar estado inicial
+    this.isLoggedIn = this.authService.getUserData() !== null;
   }
 
-  logout() {
-    this.authService.logout();
+  onLogout() {
+    this.isLoggingOut = true;
+    setTimeout(() => {
+      this.authService.logout();
+      this.router.navigate(['/login']);
+      this.isLoggingOut = false;
+    }, 500);
   }
 
-  // Helper methods para simplificar el template
-  isAdmin(): boolean {
-    return this.userRole === 'admin';
-  }
-
-  isUser(): boolean {
-    return this.userRole === 'user';
-  }
-
-  isModerator(): boolean {
-    return this.userRole === 'moderator';
+  ngOnDestroy() {
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
+    }
   }
 }

@@ -1,22 +1,39 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, NgZone, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '../../../shared/button/button';
 import { InputComponent } from '../../../shared/input/input';
+import { RouterModule, Router } from '@angular/router';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { catchError, finalize } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { AuthService } from '../../../../services/auth';
+import { StateService } from '../../../../services/state.service';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, InputComponent, ReactiveFormsModule],
+  imports: [CommonModule, ButtonComponent, InputComponent, ReactiveFormsModule, RouterModule],
   templateUrl: './login.html',
-  styleUrl: './login.css'
+  styleUrl: './login.css',
+  changeDetection: ChangeDetectionStrategy.OnPush 
 })
 export class Login {
   loginForm: FormGroup;
   isLoading = false;
+  loginError: string | null = null;
 
   @Output() loginSubmit = new EventEmitter<{ email: string, password: string }>();
 
-  constructor(private fb: FormBuilder) {
+  private apiUrl = 'http://147.135.215.156:8090/api/v1/auth/login';
+
+  constructor(
+    private fb: FormBuilder,
+    private http: HttpClient,
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService,
+    private stateService: StateService
+  ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
@@ -24,14 +41,57 @@ export class Login {
   }
 
   onSubmit() {
+    this.loginError = null;
+
     if (this.loginForm.valid) {
       this.isLoading = true;
-      this.loginSubmit.emit(this.loginForm.value);
+      this.cdr.markForCheck(); // 👈 Marca para verificación en el próximo ciclo
 
-      // Reset loading state after simulation (en realidad lo haría el servicio)
-      setTimeout(() => {
-        this.isLoading = false;
-      }, 1000);
+      const credentials = this.loginForm.value;
+      this.loginSubmit.emit(credentials);
+
+      this.http.post(this.apiUrl, credentials, { observe: 'response' })
+        .pipe(
+          finalize(() => {
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          }),
+          catchError((error: HttpErrorResponse) => {
+
+            if (error.status === 401) {
+              this.loginError = 'Email o contraseña incorrectos. Por favor, inténtalo de nuevo.';
+            } else if (error.status === 500) {
+              this.loginError = 'Error de conexión. Verifica tu conexión a internet.';
+            } else {
+              this.loginError = 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo.';
+            }
+
+            this.cdr.markForCheck(); 
+
+            return of(null);
+          })
+        )
+        .subscribe((response: any) => {
+          if (response && response.status === 200) {
+            if (response.body.use2fa) {
+              this.stateService.setEmail(credentials.email);
+                  this.router.navigate(['/verifycode']);
+                }
+            if (response.body.user.active) {
+              const authToken = response.headers.get('Authorization');
+              if (authToken) {
+                this.authService.storeUserData(authToken, response.body);
+                  this.router.navigate(['/dashboard']);
+              } else {
+                this.loginError = 'Ocurrió un problema al autenticar.';
+                this.cdr.markForCheck();
+              }
+            } else { 
+              this.loginError = 'El usuario está inhabilitado del sistema';
+              this.cdr.markForCheck();
+            }
+          }
+        });
     }
   }
 
@@ -57,12 +117,11 @@ export class Login {
     return '';
   }
 
-  get emailControl(): FormControl {
-    return this.loginForm.get('email') as FormControl;
-  }
-
   get passwordControl(): FormControl {
     return this.loginForm.get('password') as FormControl;
   }
 
+  get emailControl(): FormControl {
+    return this.loginForm.get('email') as FormControl;
+  }
 }

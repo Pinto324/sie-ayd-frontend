@@ -1,0 +1,22 @@
+/* Estilos adicionales si los necesitas */
+.container {
+    max-width: 1200px;
+}
+
+/* Efecto hover mejorado */
+.hover\:bg-gray-50:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .grid {
+        gap: 1rem;
+    }
+
+    .text-5xl {
+        font-size: 3rem;
+    }
+}

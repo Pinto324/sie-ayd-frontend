@@ -1,0 +1,46 @@
+<section class="min-h-screen w-full bg-gray-50 dark:bg-gray-900 py-8 transition-colors duration-300">
+  <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto min-h-full lg:py-0">
+    <div
+      class="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
+      <div class="p-2 space-y-4 md:space-y-6 sm:p-8">
+        <h1 class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
+          Registrar un nuevo comercio
+        </h1>
+        @if (registerTrue) {
+        <div class="p-3 mb-4 text-sm text-green-800 bg-green-50 rounded-lg dark:bg-green-900/30 dark:text-green-400">
+          <span class="font-medium">Completado:</span> {{ registerTrue }}
+        </div>
+        }
+        @if (registerError) {
+        <div class="p-3 mb-4 text-sm text-red-800 bg-red-50 rounded-lg dark:bg-red-900/30 dark:text-red-400">
+          <span class="font-medium">Error:</span> {{ registerError }}
+        </div>
+        }
+        <form class="space-y-4 md:space-y-6" [formGroup]="commerceRegisterForm" (ngSubmit)="onSubmit()">
+          <div>
+            <app-input label="Nombre del Comercio" type="text" [control]="nameControl" placeholder="Nombre de tu comercio" [error]="getNameError()"></app-input>
+          </div>
+          <div>
+            <app-input label="Correo electrónico" type="email" [control]="emailControl" placeholder="email@comercio.com" [error]="getEmailError()"></app-input>
+          </div>
+          <div>
+            <app-input label="Número de teléfono" type="tel" [control]="phoneNumberControl" placeholder="Número de teléfono" [error]="getPhoneNumberError()"></app-input>
+          </div>
+          <div>
+            <app-input label="Dirección" type="text" [control]="addressControl" placeholder="Dirección del comercio" [error]="getAddressError()"></app-input>
+          </div>
+          <div>
+            <app-input label="NIT" type="text" [control]="nitControl" placeholder="Número de NIT" [error]="getNitError()"></app-input>
+          </div>
+          <div>
+            <app-input label="Contraseña" type="password" [control]="passwordControl" placeholder="••••••" [error]="getPasswordError()"></app-input>
+          </div>
+          <div class="w-full">
+            <app-button text="Registrar Comercio" size="lg" variant="primary" [type]="'submit'" [disabled]="commerceRegisterForm.invalid || isLoading" [fullWidth]="true">
+            </app-button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
