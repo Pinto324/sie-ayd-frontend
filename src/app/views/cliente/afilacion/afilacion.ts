@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '../../../components/shared/button/button';
 import { InputComponent } from '../../../components/shared/input/input';
 import { RouterModule, Router } from '@angular/router';
-import { HttpClient, HttpHeaders,HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { AuthService } from '../../../services/auth';
@@ -15,14 +15,15 @@ import { StateService } from '../../../services/state.service';
   imports: [CommonModule, ButtonComponent, InputComponent, ReactiveFormsModule, RouterModule],
   templateUrl: './afilacion.html',
   styleUrl: './afilacion.css',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  //changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Afilacion {
- commerceRegisterForm: FormGroup;
+  commerceRegisterForm: FormGroup;
   isLoading = false;
+  isRegistered = false;
   registerError: string | null = null;
   registerTrue: string | null = null;
-  
+
   private apiUrl = 'http://147.135.215.156:8090/api/v1/commerce/register';
 
   constructor(
@@ -42,9 +43,8 @@ export class Afilacion {
       nit: ['', Validators.required],
     });
   }
-private getHeaders(): HttpHeaders {
+  private getHeaders(): HttpHeaders {
     const token = this.authService.getToken();
-    console.log(token);
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -52,34 +52,42 @@ private getHeaders(): HttpHeaders {
   }
   onSubmit() {
     this.registerError = null;
-  const headers = this.getHeaders();
+    this.registerTrue = null;
+
     if (this.commerceRegisterForm.valid) {
       this.isLoading = true;
-      this.cdr.markForCheck();
-
+      const headers = this.getHeaders();
       const commerceData = this.commerceRegisterForm.value;
 
       this.http.post(this.apiUrl, commerceData, { headers })
-        .pipe(
-          finalize(() => {
+        .subscribe({
+          next: (response: any) => {
             this.isLoading = false;
-            this.cdr.markForCheck();
-          }),
-          catchError((error: HttpErrorResponse) => {
-            if (error.status === 409) {
-              this.registerError = 'El email o el NIT ya están registrados.';
+            this.registerTrue = 'Se realizó la solicitud correctamente!';
+            this.commerceRegisterForm.disable();
+            this.isRegistered = true;
+            this.cdr.detectChanges();
+          },
+          error: (error: HttpErrorResponse) => {
+            this.isLoading = false;
+
+            if (error.status === 400 && error.error && Array.isArray(error.error)) {
+              const errorMessages = error.error.map((err: any) => err.message).join(', ');
+              this.registerError = errorMessages;
+            } else if (error.status === 400) {
+              this.registerError = 'Error de validación en los datos enviados.';
             } else if (error.status === 500) {
               this.registerError = 'Error de conexión. Por favor, verifica tu internet.';
             } else {
               this.registerError = 'Ocurrió un error inesperado. Por favor, inténtalo de nuevo.';
             }
-            this.cdr.markForCheck();
-            return of(null);
-          })
-        )
-        .subscribe((response: any) => {
-          if (response && response.status === 200) {
-            this.registerTrue = 'Se realizó la solicitud correctamente!';
+
+            // Forzar detección de cambios con setTimeout
+            setTimeout(() => {
+              this.cdr.detectChanges();
+            });
+            console.log(this.registerError);
+            // También marca para check
             this.cdr.markForCheck();
           }
         });
@@ -89,7 +97,7 @@ private getHeaders(): HttpHeaders {
   get nameControl(): FormControl {
     return this.commerceRegisterForm.get('name') as FormControl;
   }
-  
+
   get emailControl(): FormControl {
     return this.commerceRegisterForm.get('email') as FormControl;
   }
@@ -109,13 +117,13 @@ private getHeaders(): HttpHeaders {
   get nitControl(): FormControl {
     return this.commerceRegisterForm.get('nit') as FormControl;
   }
-  
+
   // Métodos para obtener errores de validación
   getNameError(): string {
     const control = this.nameControl;
     return (control?.errors?.['required'] && control.touched) ? 'El nombre del comercio es requerido' : '';
   }
-  
+
   getEmailError(): string {
     const control = this.emailControl;
     if (control?.errors?.['required'] && control.touched) {
@@ -131,7 +139,7 @@ private getHeaders(): HttpHeaders {
     const control = this.phoneNumberControl;
     return (control?.errors?.['required'] && control.touched) ? 'El número de teléfono es requerido' : '';
   }
-  
+
   getAddressError(): string {
     const control = this.addressControl;
     return (control?.errors?.['required'] && control.touched) ? 'La dirección es requerida' : '';

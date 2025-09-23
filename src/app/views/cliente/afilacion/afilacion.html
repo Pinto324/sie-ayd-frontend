@@ -36,8 +36,10 @@
             <app-input label="Contraseña" type="password" [control]="passwordControl" placeholder="••••••" [error]="getPasswordError()"></app-input>
           </div>
           <div class="w-full">
-            <app-button text="Registrar Comercio" size="lg" variant="primary" [type]="'submit'" [disabled]="commerceRegisterForm.invalid || isLoading" [fullWidth]="true">
-            </app-button>
+    @if (!isRegistered) { <app-button text="Registrar Comercio" size="lg" variant="primary" [type]="'submit'"
+      [disabled]="commerceRegisterForm.invalid || isLoading" [fullWidth]="true">
+    </app-button>
+    }
           </div>
         </form>
       </div>

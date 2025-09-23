@@ -36,7 +36,8 @@ export class Solicitud implements OnInit {
   faCheckCircle = faCheckCircle;
   faTimesCircle = faTimesCircle;
   faSearch = faSearch;
-
+  aceptada = false;
+  rechazada = false;
   private apiUrl = 'http://147.135.215.156:8090/api/v1/commerce/request?page=0&size=10';
   private acceptUrl = 'http://147.135.215.156:8090/api/v1/commerce';
 
@@ -44,7 +45,7 @@ export class Solicitud implements OnInit {
     private http: HttpClient,
     private authService: AuthService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadCommerceRequests();
@@ -64,8 +65,7 @@ export class Solicitud implements OnInit {
       next: (response) => {
         this.requests = response.content;
         this.filteredRequests = response.content;
-        console.log('Commerce requests loaded successfully:', this.requests);
-        this.cdr.markForCheck(); 
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Error loading commerce requests:', error);
@@ -92,12 +92,13 @@ export class Solicitud implements OnInit {
     if (confirm(`¿Estás seguro de que quieres aceptar a ${request.name}?`)) {
       const headers = this.getHeaders();
       const payload = { isMember: true };
-      
+
       this.http.post(`${this.acceptUrl}/${request.id}`, payload, { headers }).subscribe({
         next: () => {
-          console.log(`Request for ${request.name} accepted.`);
+          this.aceptada = true;
           // Reload the list to remove the accepted request from the table
           this.loadCommerceRequests();
+          this.cdr.detectChanges();
         },
         error: (error) => {
           console.error('Error accepting commerce request:', error);
@@ -112,11 +113,12 @@ export class Solicitud implements OnInit {
       // Lógica para rechazar
       const headers = this.getHeaders();
       const payload = { isMember: false };
-      
+
       this.http.post(`${this.acceptUrl}/${request.id}`, payload, { headers }).subscribe({
         next: () => {
-          console.log(`Request for ${request.name} rejected.`);
+          this.rechazada = true;
           this.loadCommerceRequests();
+          this.cdr.detectChanges();
         },
         error: (error) => {
           console.error('Error rejecting commerce request:', error);
