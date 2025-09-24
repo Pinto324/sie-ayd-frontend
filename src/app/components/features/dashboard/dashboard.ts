@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faUsers, faBuilding, faUserTie, faChartBar, faCog, faFileAlt, faDumpster, faIdCardClip, faBoxesStacked } from '@fortawesome/free-solid-svg-icons';
+import { faUsers, faBuilding, faUserTie, faChartBar, faCog, faFileAlt, faPercent, faDumpster, faIdCardClip, faBoxesStacked } from '@fortawesome/free-solid-svg-icons';
 interface ModuleCard {
   id: number;
   title: string;
@@ -29,7 +29,7 @@ export class Dashboard implements OnInit {
     private library: FaIconLibrary
   ) {
     // Agregar iconos a la librería
-    library.addIcons(faUsers, faBuilding, faUserTie, faChartBar, faCog, faFileAlt, faDumpster, faIdCardClip,faBoxesStacked);
+    library.addIcons(faUsers, faPercent, faBuilding, faUserTie, faChartBar, faCog, faFileAlt, faDumpster, faIdCardClip, faBoxesStacked);
   }
 
   ngOnInit() {
@@ -66,9 +66,9 @@ export class Dashboard implements OnInit {
       },
       {
         id: 4,
-        title: 'Módulo de Comercio',
-        description: 'Controla la información de los comercios.',
-        icon: 'dumpster',
+        title: 'Módulo de precios',
+        description: 'Controla los precios o porcentajes de distintas funcionalidades del sistema.',
+        icon: 'percent',
         route: '/commerce',
         roleAccess: [1]
       },
