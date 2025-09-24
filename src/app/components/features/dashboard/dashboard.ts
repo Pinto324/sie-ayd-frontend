@@ -69,7 +69,7 @@ export class Dashboard implements OnInit {
         title: 'Módulo de precios',
         description: 'Controla los precios o porcentajes de distintas funcionalidades del sistema.',
         icon: 'percent',
-        route: '/commerce',
+        route: '/ModuloPrecios',
         roleAccess: [1]
       },
       {

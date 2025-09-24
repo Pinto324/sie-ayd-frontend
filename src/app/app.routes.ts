@@ -8,6 +8,7 @@ import { Recoverpass } from './components/features/auth/recoverpass/recoverpass'
 import { Dashboard } from './components/features/dashboard/dashboard';
 import { Usuarios } from './views/admin/usuarios/usuarios';
 import { Sucursal } from './views/admin/sucursal/sucursal';
+import { Precios } from './views/admin/precios/precios';
 import { Afilacion } from './views/cliente/afilacion/afilacion';
 import { AuthGuard } from './services/auth.guard';
 import { AdminGuard } from './services/adminguard';
@@ -19,29 +20,33 @@ export const routes: Routes = [
   { path: 'verifycode', component: Verifycode },
   { path: 'changepass', component: Changepass },
   { path: 'recoverpass', component: Recoverpass },
-  
+
   // Rutas protegidas
-  { 
-    path: 'dashboard', 
-    component: Dashboard, 
-    canActivate: [AuthGuard] 
-  },{ 
-    path: 'afilacion', 
-    component: Afilacion, 
-    canActivate: [AuthGuard] 
+  {
+    path: 'dashboard',
+    component: Dashboard,
+    canActivate: [AuthGuard]
+  }, {
+    path: 'afilacion',
+    component: Afilacion,
+    canActivate: [AuthGuard]
   },
-  
+
   // Ruta protegida para administradores
-  { 
-    path: 'ModuloUsuario', 
-    component: Usuarios, 
-    canActivate: [AuthGuard, AdminGuard] 
+  {
+    path: 'ModuloUsuario',
+    component: Usuarios,
+    canActivate: [AuthGuard, AdminGuard]
   },
-  { 
-    path: 'ModuloSucursal', 
-    component: Sucursal, 
-    canActivate: [AuthGuard, AdminGuard] 
+  {
+    path: 'ModuloSucursal',
+    component: Sucursal,
+    canActivate: [AuthGuard, AdminGuard]
+  }, {
+    path: 'ModuloPrecios',
+    component: Precios,
+    canActivate: [AuthGuard, AdminGuard]
   },
-  
+
   { path: '**', redirectTo: '' }
 ];
