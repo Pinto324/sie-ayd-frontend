@@ -183,7 +183,6 @@ export class Guias {
         this.http.put(`${this.guidesApiUrl}/${this.selectedGuide.id}`, payload, { headers })
           .subscribe({
             next: () => {
-              console.log('Guide updated successfully');
               this.loadGuides();
               this.closeModal();
             },

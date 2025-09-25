@@ -5,6 +5,7 @@ import { Register } from './components/features/auth/register/register';
 import { Verifycode } from './components/features/auth/verifycode/verifycode';
 import { Changepass } from './components/features/auth/changepass/changepass';
 import { Recoverpass } from './components/features/auth/recoverpass/recoverpass';
+import { Guia } from './components/features/auth/guia/guia';
 import { Dashboard } from './components/features/dashboard/dashboard';
 import { Usuarios } from './views/admin/usuarios/usuarios';
 import { Sucursal } from './views/admin/sucursal/sucursal';
@@ -21,7 +22,7 @@ export const routes: Routes = [
   { path: 'verifycode', component: Verifycode },
   { path: 'changepass', component: Changepass },
   { path: 'recoverpass', component: Recoverpass },
-
+  { path: 'buscapaquete', component: Guia },
   // Rutas protegidas
   {
     path: 'dashboard',
