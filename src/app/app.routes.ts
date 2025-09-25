@@ -10,6 +10,7 @@ import { Usuarios } from './views/admin/usuarios/usuarios';
 import { Sucursal } from './views/admin/sucursal/sucursal';
 import { Precios } from './views/admin/precios/precios';
 import { Afilacion } from './views/cliente/afilacion/afilacion';
+import { Guias } from './views/comercios/guias/guias';
 import { AuthGuard } from './services/auth.guard';
 import { AdminGuard } from './services/adminguard';
 
@@ -29,6 +30,10 @@ export const routes: Routes = [
   }, {
     path: 'afilacion',
     component: Afilacion,
+    canActivate: [AuthGuard]
+  }, {
+    path: 'guias',
+    component: Guias,
     canActivate: [AuthGuard]
   },
 

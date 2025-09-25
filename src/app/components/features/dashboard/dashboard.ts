@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faUsers, faBuilding, faUserTie, faChartBar, faCog, faFileAlt, faPercent, faDumpster, faIdCardClip, faBoxesStacked } from '@fortawesome/free-solid-svg-icons';
+import { faUsers, faBuilding, faMoneyCheck, faUserTie, faChartBar, faCog, faFileAlt, faPercent, faDumpster, faIdCardClip, faBoxesStacked } from '@fortawesome/free-solid-svg-icons';
 interface ModuleCard {
   id: number;
   title: string;
@@ -29,7 +29,7 @@ export class Dashboard implements OnInit {
     private library: FaIconLibrary
   ) {
     // Agregar iconos a la librería
-    library.addIcons(faUsers, faPercent, faBuilding, faUserTie, faChartBar, faCog, faFileAlt, faDumpster, faIdCardClip, faBoxesStacked);
+    library.addIcons(faUsers, faPercent, faMoneyCheck, faBuilding, faUserTie, faChartBar, faCog, faFileAlt, faDumpster, faIdCardClip, faBoxesStacked);
   }
 
   ngOnInit() {
@@ -89,7 +89,15 @@ export class Dashboard implements OnInit {
         roleAccess: [1]
       },
       {
-        id: 7,
+        id: 1,
+        title: 'Guias de entrega',
+        description: 'Control de las guías de tus paquetes.',
+        icon: 'money-check',
+        route: '/guias',
+        roleAccess: [2]
+      },
+      {
+        id: 1,
         title: 'Paquetes',
         description: 'Todas la información y configuraciones del estado de tu paquete!.',
         icon: 'boxes-stacked',
@@ -97,7 +105,7 @@ export class Dashboard implements OnInit {
         roleAccess: [5]
       },
       {
-        id: 8,
+        id: 2,
         title: 'Afilación',
         description: 'Quieres afiliar tu empresa con nuestro servicio de paquetes? manda una solicitud acá!.',
         icon: 'dumpster',
