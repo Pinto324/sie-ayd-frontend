@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../services/auth';
@@ -12,6 +12,7 @@ import {
 // Importar los nuevos componentes y interfaces
 import { Searchtable } from '../../../components/shared/searchtable/searchtable';
 import { Table, TableColumn, TableAction } from '../../../components/shared/table/table';
+import { Modal } from '../../../components/shared/modal/modal';
 interface Commerce {
   id: number;
   nit: string;
@@ -54,7 +55,7 @@ interface Guide {
 
 @Component({
   selector: 'app-guias',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, FontAwesomeModule, DatePipe, Searchtable, Table],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, FontAwesomeModule, Searchtable, Table],
   templateUrl: './guias.html',
   styleUrl: './guias.css'
 })
