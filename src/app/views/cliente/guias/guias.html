@@ -1,0 +1,33 @@
+@if (!showDetailView) {
+<div class="container mx-auto px-4 py-8">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-black">Mis Guías de Envío</h1>
+            <p class="text-gray-600 dark:text-gray-300 mt-2">Consulta el estado y los detalles de tus envíos.</p>
+        </div>
+
+        <div class="flex gap-4 mt-4 md:mt-0">
+            <app-searchtable placeholder="Buscar por código, destinatario o comercio..." [initialTerm]="searchTerm"
+                (searchChange)="onSearchChange($event)">
+            </app-searchtable>
+        </div>
+    </div>
+
+    <app-table [data]="filteredGuides" [columns]="tableColumns" [actions]="tableActions"
+        (actionClick)="handleTableAction($event)">
+    </app-table>
+</div>
+} @else {
+<div class="container mx-auto px-4 py-8">
+
+    <button (click)="goBackToTable()"
+        class="flex items-center gap-2 mb-6 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 transition-colors">
+        <fa-icon [icon]="faArrowLeft"></fa-icon>
+        Volver a la Lista
+    </button>
+
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-black mb-6">Seguimiento de Guía</h1>
+
+    <app-guiadetalle [guideCode]="selectedGuideCode"></app-guiadetalle>
+</div>
+}

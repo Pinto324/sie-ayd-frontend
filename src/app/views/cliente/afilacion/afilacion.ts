@@ -86,7 +86,6 @@ export class Afilacion {
             setTimeout(() => {
               this.cdr.detectChanges();
             });
-            console.log(this.registerError);
             // También marca para check
             this.cdr.markForCheck();
           }

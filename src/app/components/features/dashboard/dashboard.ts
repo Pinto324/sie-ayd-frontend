@@ -109,7 +109,7 @@ export class Dashboard implements OnInit {
         title: 'Paquetes',
         description: 'Todas la información y configuraciones del estado de tu paquete!.',
         icon: 'boxes-stacked',
-        route: '/settings',
+        route: '/guiascliente',
         roleAccess: [5]
       },
       {
