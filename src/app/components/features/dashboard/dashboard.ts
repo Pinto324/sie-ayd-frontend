@@ -74,6 +74,14 @@ export class Dashboard implements OnInit {
       },
       {
         id: 5,
+        title: 'Módulo de guias',
+        description: 'Revisa todas las guías en el sistema.',
+        icon: 'money-check',
+        route: '/ModuloGuias',
+        roleAccess: [1]
+      },
+      {
+        id: 6,
         title: 'Módulo de Reportes',
         description: 'Genera reportes y estadísticas del sistema.',
         icon: 'id-card-clip',
@@ -81,7 +89,7 @@ export class Dashboard implements OnInit {
         roleAccess: [1, 2]
       },
       {
-        id: 6,
+        id: 7,
         title: 'Módulo de Configuración',
         description: 'Configuración general del sistema y preferencias.',
         icon: 'gear',

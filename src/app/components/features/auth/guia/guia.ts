@@ -1,138 +1,47 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { AuthService } from '../../../../services/auth';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import {
-  faSearch,
-  faBoxOpen,      // Creada
-  faBoxArchive,   // Asignada
-  faTruckRampBox, // Recogida
-  faTruckFast,    // En ruta
-  faCheck,        // Entregada
-  faBan,          // Cancelada
-  faTimes         // Rechazada
-} from '@fortawesome/free-solid-svg-icons';
-
-// Interfaces para la estructura de los datos de la API
-interface Commerce {
-  id: number;
-  nit: string;
-  name: string;
-  email: string;
-  phoneNumber: string;
-  createdAt: string;
-  member: string;
-  address: string;
-}
-
-interface Status {
-  id: number;
-  name: string;
-  description: string;
-}
-
-interface PackageType {
-  id: number;
-  name: string;
-  description: string;
-  basePrice: number;
-}
-
-interface Guide {
-  id: number;
-  code: string;
-  commerce: Commerce;
-  recipient: string;
-  address: string;
-  phone: string;
-  email: string;
-  description: string;
-  price: number;
-  status: Status;
-  type: PackageType;
-  createdAt: string;
-  updatedAt: string;
-}
+import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import { Guiadetalle } from '../../../shared/guiadetalle/guiadetalle';
 
 
 @Component({
   selector: 'app-guia',
-  imports: [CommonModule, FormsModule, FontAwesomeModule, DatePipe],
+  imports: [CommonModule, FormsModule, FontAwesomeModule, Guiadetalle],
   templateUrl: './guia.html',
   styleUrl: './guia.css'
 })
 export class Guia implements OnInit {
   guideCode: string = '';
-  guideInfo: Guide | null = null;
-  isLoading = false;
-  errorMessage: string | null = null;
+
+  errorMessage: string | null = null; // Kept for input validation error
   faSearch = faSearch;
 
-  // Iconos para los estados
-  statusIcons: { [key: number]: any } = {
-    1: faBoxOpen,
-    2: faBoxArchive,
-    3: faTruckRampBox,
-    4: faTruckFast,
-    5: faCheck,
-    6: faBan,
-    7: faTimes,
-  };
+  searchCode: string | null = null;
 
-  statusNames: { [key: number]: string } = {
-    1: 'Creada',
-    2: 'Asignada',
-    3: 'Recogida',
-    4: 'En ruta',
-    5: 'Entregada',
-    6: 'Cancelada',
-    7: 'Rechazada',
-  };
 
-  private apiUrl = 'http://147.135.215.156:8090/api/v1/guides/search?code=';
-
-  constructor(
-    private http: HttpClient,
-    private authService: AuthService,
-    private cdr: ChangeDetectorRef,
-  ) { }
+  constructor() { }
 
   ngOnInit() { }
 
 
   getGuideInfo() {
-    if (!this.guideCode) {
+    if (!this.guideCode.trim()) {
       this.errorMessage = 'Por favor, introduce un código de guía.';
-      this.guideInfo = null;
+      this.searchCode = null; // Clear detail view
       return;
     }
 
-    this.isLoading = true;
     this.errorMessage = null;
 
-    this.http.get<Guide>(`${this.apiUrl}${this.guideCode}`).subscribe({
-      next: (response) => {
-        console.log(response);
-        this.guideInfo = response;
-        this.isLoading = false;
-        this.cdr.markForCheck();
-      },
-      error: (error) => {
-        console.error('Error fetching guide info:', error);
-        this.isLoading = false;
-        if (error.status === 404) {
-          this.errorMessage = 'No se encontró la guía con el código proporcionado.';
-        } else {
-          this.errorMessage = 'Ocurrió un error al buscar la guía. Por favor, intenta de nuevo más tarde.';
-        }
-        this.guideInfo = null;
-      }
-    });
+    this.searchCode = this.guideCode.trim();
+
+    // NOTA: Si necesitas que el input vacío se considere un error de UX aquí, 
+    // el código de arriba es suficiente. Si permites que el componente hijo
+    // maneje la validación del código vacío/nulo, podrías simplificar esto:
+    // this.searchCode = this.guideCode.trim() || null;
   }
 
-  isCurrentStatus(statusId: number): boolean {
-    return this.guideInfo?.status.id === statusId;
-  }
+  // REMOVED: isCurrentStatus, getGuideInfo (the original API call logic)
 }
