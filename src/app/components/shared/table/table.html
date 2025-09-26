@@ -1,0 +1,73 @@
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    @for (column of columns; track column.key) {
+                    <th scope="col" class="px-6 py-3">
+                        {{ column.header }}
+                    </th>
+                    }
+                    @if (actions.length > 0) {
+                    <th scope="col" class="px-6 py-3">Acciones</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @if (data && data.length > 0) {
+                @for (item of data; track item.id) {
+                <tr
+                    class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+
+                    @for (column of columns; track column.key) {
+                    <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+
+                        @switch (column.type) {
+                        @case ('currency') {
+                        ${{ getCellValue(item, column) | number: (column.pipeFormat || '1.2-2') }}
+                        }
+                        @case ('date') {
+                        {{ getCellValue(item, column) | date: (column.pipeFormat || 'short') }}
+                        }
+                        @case ('iconStatus') {
+                        <div class="flex items-center gap-2">
+                            @if (statusIcons[item.status.id]) {
+                            <fa-icon [icon]="statusIcons[item.status.id]" class="w-4 h-4"></fa-icon>
+                            }
+                            <span>{{ item.status.name }}</span>
+                        </div>
+                        }
+                        @default {
+                        {{ getCellValue(item, column) }}
+                        }
+                        }
+                    </td>
+                    }
+
+                    @if (actions.length > 0) {
+                    <td class="px-6 py-4 flex gap-2">
+                        @for (action of actions; track action.action) {
+                        @if (shouldShowAction(action, item)) {
+                        <button (click)="onActionClick(action.action, item)"
+                            [class]="action.class || 'px-3 py-1 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors'">
+                            <fa-icon [icon]="action.icon"></fa-icon>
+                            {{ action.label }}
+                        </button>
+                        }
+                        }
+                    </td>
+                    }
+                </tr>
+                }
+                } @else {
+                <tr>
+                    <td [attr.colspan]="columns.length + (actions.length > 0 ? 1 : 0)"
+                        class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                        No se encontraron resultados
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

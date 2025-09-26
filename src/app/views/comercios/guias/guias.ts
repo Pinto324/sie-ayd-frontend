@@ -4,7 +4,14 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../services/auth';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faPlus, faEdit, faTimes, faSearch } from '@fortawesome/free-solid-svg-icons';
+import {
+  faPlus, faEdit, faTimes, faSearch,
+  faBoxOpen, faBoxArchive, faTruckRampBox, faTruckFast, faCheck, faBan
+} from '@fortawesome/free-solid-svg-icons';
+
+// Importar los nuevos componentes y interfaces
+import { Searchtable } from '../../../components/shared/searchtable/searchtable';
+import { Table, TableColumn, TableAction } from '../../../components/shared/table/table';
 interface Commerce {
   id: number;
   nit: string;
@@ -47,7 +54,7 @@ interface Guide {
 
 @Component({
   selector: 'app-guias',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, FontAwesomeModule, DatePipe],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, FontAwesomeModule, DatePipe, Searchtable, Table],
   templateUrl: './guias.html',
   styleUrl: './guias.css'
 })
@@ -64,6 +71,41 @@ export class Guias {
   faTimes = faTimes;
   faSearch = faSearch;
   guideForm: FormGroup;
+
+  tableColumns: TableColumn[] = [
+    { key: 'code', header: 'Código', type: 'text' },
+    { key: 'recipient', header: 'Destinatario', type: 'text' },
+    { key: 'price', header: 'Precio', type: 'currency', pipeFormat: '1.2-2' },
+    { key: 'type', header: 'Tipo de Paquete', type: 'nested', nestedKey: 'name' },
+    { key: 'createdAt', header: 'Fecha de Creación', type: 'date', pipeFormat: 'short' },
+    { key: 'status', header: 'Estado', type: 'iconStatus', nestedKey: 'name' }, // Usar iconStatus
+  ];
+
+  statusIcons: { [key: number]: any } = {
+    1: faBoxOpen,
+    2: faBoxArchive,
+    3: faTruckRampBox,
+    4: faTruckFast,
+    5: faCheck,
+    6: faBan,
+  };
+
+  tableActions: TableAction[] = [
+    {
+      label: 'Editar',
+      icon: faEdit,
+      action: 'edit',
+      condition: (guide: Guide) => this.canEditOrCancel(guide.status.id), // Condición basada en el estado
+      class: 'px-3 py-1 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors'
+    },
+    {
+      label: 'Cancelar',
+      icon: faTimes,
+      action: 'cancel',
+      condition: (guide: Guide) => this.canEditOrCancel(guide.status.id), // Condición basada en el estado
+      class: 'px-3 py-1 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors'
+    },
+  ];
 
   private guidesApiUrl = 'http://147.135.215.156:8090/api/v1/guides';
   private packageTypeApiUrl = 'http://147.135.215.156:8090/api/v1/package-type';
@@ -103,8 +145,7 @@ export class Guias {
     this.http.get<Guide[]>(this.guidesApiUrl, { headers }).subscribe({
       next: (response) => {
         this.guides = response;
-        this.filteredGuides = response;
-        console.log(this.guides);
+        this.searchGuides(this.searchTerm); // Aplicar el filtro después de cargar
         this.cdr.markForCheck();
       },
       error: (error) => {
@@ -112,6 +153,25 @@ export class Guias {
       }
     });
   }
+  onSearchChange(term: string) {
+    this.searchTerm = term;
+    this.searchGuides(term);
+  }
+
+  handleTableAction(event: { action: string, item: Guide }): void {
+    const guide = event.item;
+    switch (event.action) {
+      case 'edit':
+        this.openEditModal(guide);
+        break;
+      case 'cancel':
+        this.cancelGuide(guide);
+        break;
+      default:
+        console.warn(`Acción desconocida: ${event.action}`);
+    }
+  }
+
 
   loadPackageTypes() {
     const headers = this.getHeaders();
@@ -125,17 +185,18 @@ export class Guias {
     });
   }
 
-  searchGuides() {
-    if (!this.searchTerm) {
+  searchGuides(term: string) {
+    if (!term) {
       this.filteredGuides = this.guides;
       return;
     }
 
-    const term = this.searchTerm.toLowerCase();
+    const lowerCaseTerm = term.toLowerCase();
     this.filteredGuides = this.guides.filter(guide =>
-      guide.code.toLowerCase().includes(term) ||
-      guide.recipient.toLowerCase().includes(term) ||
-      guide.type.name.toLowerCase().includes(term)
+      guide.code.toLowerCase().includes(lowerCaseTerm) ||
+      guide.recipient.toLowerCase().includes(lowerCaseTerm) ||
+      guide.type.name.toLowerCase().includes(lowerCaseTerm) ||
+      guide.status.name.toLowerCase().includes(lowerCaseTerm) // Añadir filtro por estado
     );
   }
 
