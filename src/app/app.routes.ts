@@ -9,6 +9,7 @@ import { Guia } from './components/features/auth/guia/guia';
 import { Dashboard } from './components/features/dashboard/dashboard';
 import { Usuarios } from './views/admin/usuarios/usuarios';
 import { Sucursal } from './views/admin/sucursal/sucursal';
+import { Repartidor } from './views/admin/repartidor/repartidor';
 import { Precios } from './views/admin/precios/precios';
 import { Afilacion } from './views/cliente/afilacion/afilacion';
 import { Guias } from './views/comercios/guias/guias';
@@ -47,6 +48,10 @@ export const routes: Routes = [
   {
     path: 'ModuloSucursal',
     component: Sucursal,
+    canActivate: [AuthGuard, AdminGuard]
+  }, {
+    path: 'ModuloRepartidor',
+    component: Repartidor,
     canActivate: [AuthGuard, AdminGuard]
   }, {
     path: 'ModuloPrecios',

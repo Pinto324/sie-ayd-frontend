@@ -1,0 +1,159 @@
+<div class="container mx-auto px-4 py-8">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-black">Gestión de Empleados</h1>
+            <p class="text-gray-600 dark:text-black-300 mt-2">Administra el personal de reparto.</p>
+        </div>
+
+        <div class="flex gap-4 mt-4 md:mt-0">
+            <app-searchtable placeholder="Buscar empleados por nombre o DNI..." [initialTerm]="searchTerm"
+                (searchChange)="onSearchChange($event)">
+            </app-searchtable>
+
+            <button (click)="openCreateModal()"
+                class="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 transition-colors">
+                <fa-icon [icon]="faPlus"></fa-icon>
+                Crear Empleado
+            </button>
+        </div>
+    </div>
+
+    <app-table [data]="filteredEmployees" [columns]="tableColumns" [actions]="tableActions"
+        (actionClick)="handleTableAction($event)">
+    </app-table>
+</div>
+
+<app-modal [isOpen]="isModalOpen" [title]="isEditMode ? 'Modificar Empleado' : 'Crear Nuevo Empleado'" size="lg"
+    (close)="closeModal()">
+
+    <div modal-body>
+        <form [formGroup]="employeeForm" class="space-y-6">
+
+            <h4 class="text-lg font-semibold text-gray-900 dark:text-white pt-2">Datos Personales</h4>
+            <hr class="border-gray-300 dark:border-gray-600">
+
+            <div class="space-y-4">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="firstname"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nombre *</label>
+                        <input type="text" formControlName="firstname" id="firstname"
+                            class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                            required>
+                    </div>
+                    <div>
+                        <label for="lastname"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Apellido *</label>
+                        <input type="text" formControlName="lastname" id="lastname"
+                            class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                            required>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="phoneNumber"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Teléfono *</label>
+                        <input type="tel" formControlName="phoneNumber" id="phoneNumber"
+                            class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                            required>
+                    </div>
+                    <div>
+                        <label for="dni" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">DNI
+                            *</label>
+                        <input type="text" formControlName="dni" id="dni"
+                            class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                            required>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="birthDate" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Fec. Nac. *</label>
+                            <input type="date" formControlName="birthDate" id="birthDate"
+                                class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                                required>
+                        </div>
+                    <div>
+                        <label for="emergencyContact"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Contacto Emergencia
+                            *</label>
+                        <input type="tel" formControlName="emergencyContact" id="emergencyContact"
+                            class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                            required>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Dirección
+                        *</label>
+                    <textarea formControlName="address" id="address" rows="3"
+                        class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                        required></textarea>
+                </div>
+
+            </div>
+
+            <h4 class="text-lg font-semibold text-gray-900 dark:text-white pt-4">Datos de Contrato</h4>
+            <hr class="border-gray-300 dark:border-gray-600">
+
+            <div class="space-y-4">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="contractTypeId"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipo de Contrato
+                            *</label>
+                        <select id="contractTypeId" formControlName="contractTypeId"
+                            class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                            required>
+                            <option [ngValue]="null" disabled selected>Selecciona un tipo</option>
+                            @for (type of contractTypes; track type.id) {
+                            <option [ngValue]="type.id">{{ type.name }}</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label for="baseSalary"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Salario Base *</label>
+                        <input type="number" formControlName="baseSalary" id="baseSalary" min="0"
+                            class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                            required>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="commissionPercentage"
+                            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Comisión (%) *</label>
+                        <input type="number" formControlName="commissionPercentage" id="commissionPercentage" min="0"
+                            max="100"
+                            class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                            required>
+                    </div>
+                        <div>
+                            <label for="endDate" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Fec. Finalización
+                                *</label>
+                            <input type="date" formControlName="endDate" id="endDate"
+                                class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                                required>
+                        </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div modal-footer class="flex justify-end w-full gap-2">
+        <button (click)="closeModal()" type="button"
+            class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600">
+            Cancelar
+        </button>
+        <button (click)="onSubmit()" [disabled]="!employeeForm.valid || isLoadingModal"
+            class="text-white inline-flex items-center bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center disabled:opacity-50 disabled:cursor-not-allowed">
+            <fa-icon [icon]="isEditMode ? faEdit : faPlus" class="me-1 -ms-1 w-5 h-5"></fa-icon>
+            {{ isEditMode ? 'Actualizar Empleado' : 'Crear Empleado' }}
+        </button>
+    </div>
+
+</app-modal>

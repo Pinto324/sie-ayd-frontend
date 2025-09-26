@@ -3,7 +3,7 @@
     (click)="onClose()">
 
     <div [class]="modalSizeClasses" (click)="$event.stopPropagation()"
-        class="relative bg-white rounded-lg shadow-2xl dark:bg-gray-700 w-full mx-4 transition-transform duration-300 ease-out transform scale-100 opacity-100">
+        class="relative bg-white rounded-lg shadow-2xl dark:bg-gray-700 w-full mx-4 my-8 transition-transform duration-300 ease-out transform scale-100 opacity-100">
 
         <div
             class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
@@ -17,7 +17,7 @@
             </button>
         </div>
 
-        <div class="p-4 md:p-5 max-h-[80vh] overflow-y-auto">
+        <div class="p-4 md:p-5 max-h-[80vh] overflow-y-auto custom-scrollbar">
             <ng-content select="[modal-body]"></ng-content>
         </div>
 

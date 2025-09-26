@@ -58,10 +58,10 @@ export class Dashboard implements OnInit {
       },
       {
         id: 3,
-        title: 'Módulo de Trabajadores',
-        description: 'Controla la información de los trabajadores y sus asignaciones.',
+        title: 'Módulo de repartidores',
+        description: 'Controla la información de los repartidores y sus contratos.',
         icon: 'user-tie',
-        route: '/workers',
+        route: '/ModuloRepartidor',
         roleAccess: [1] // Solo rol 1 puede acceder
       },
       {

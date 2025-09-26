@@ -55,7 +55,7 @@ interface Guide {
 
 @Component({
   selector: 'app-guias',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, FontAwesomeModule, Searchtable, Table],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, FontAwesomeModule, Searchtable, Table, Modal],
   templateUrl: './guias.html',
   styleUrl: './guias.css'
 })

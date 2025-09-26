@@ -12,6 +12,7 @@ import { Subscription } from 'rxjs';
 })
 export class Navbar implements OnInit, OnDestroy {
   isLoggedIn = false;
+  userRole: number | null = null;
   private authSubscription!: Subscription;
   isLoggingOut = false;
   constructor(
@@ -24,7 +25,9 @@ export class Navbar implements OnInit, OnDestroy {
     this.authSubscription = this.authService.currentUser$.subscribe(
       user => {
         this.isLoggedIn = !!user;
+        this.userRole = user ? this.authService.getRoleId() : null;
       }
+
     );
 
     // Verificar estado inicial

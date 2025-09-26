@@ -1,0 +1,43 @@
+/* components/shared/modal/modal.component.css */
+
+/* Ocultar el scrollbar en navegadores basados en WebKit (Chrome, Safari, Edge) */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    /* Ancho de la barra de desplazamiento */
+    height: 8px;
+    /* Altura para scrollbars horizontales */
+}
+
+/* El "track" (fondo) del scrollbar */
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    /* Color de fondo claro */
+    border-radius: 10px;
+}
+
+/* El "thumb" (la barra que se mueve) del scrollbar */
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #a0a0a0;
+    /* Color gris suave */
+    border-radius: 10px;
+}
+
+/* El "thumb" al pasar el mouse */
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #888;
+}
+
+/* Estilos para Dark Mode */
+.dark .custom-scrollbar::-webkit-scrollbar-track {
+    background: #4b5563;
+    /* Gris oscuro para el track */
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #6b7280;
+    /* Gris más claro para el thumb */
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+}
