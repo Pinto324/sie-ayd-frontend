@@ -69,12 +69,13 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="birthDate" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Fec. Nac. *</label>
-                            <input type="date" formControlName="birthDate" id="birthDate"
-                                class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-                                required>
-                        </div>
+                    <div>
+                        <label for="birthDate" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Fec.
+                            Nac. *</label>
+                        <input type="date" formControlName="birthDate" id="birthDate"
+                            class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                            required>
+                    </div>
                     <div>
                         <label for="emergencyContact"
                             class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Contacto Emergencia
@@ -95,6 +96,7 @@
 
             </div>
 
+            @if (!isEditMode) {
             <h4 class="text-lg font-semibold text-gray-900 dark:text-white pt-4">Datos de Contrato</h4>
             <hr class="border-gray-300 dark:border-gray-600">
 
@@ -132,15 +134,17 @@
                             class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
                             required>
                     </div>
-                        <div>
-                            <label for="endDate" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Fec. Finalización
-                                *</label>
-                            <input type="date" formControlName="endDate" id="endDate"
-                                class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-                                required>
-                        </div>
+                    <div>
+                        <label for="endDate" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Fec.
+                            Finalización
+                            *</label>
+                        <input type="date" formControlName="endDate" id="endDate"
+                            class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                            required>
+                    </div>
                 </div>
             </div>
+            }
         </form>
     </div>
 

@@ -31,6 +31,10 @@ interface Employee {
   use2fa: boolean;
   contractId: number;
   contractStatus: string;
+  // CAMPOS AÑADIDOS PARA EL EDITAR (Asumiendo que vienen en la data)
+  birthDate: string;
+  address: string;
+  emergencyContact: string;
 }
 
 // Interfaz para la respuesta paginada de la API
@@ -45,6 +49,7 @@ interface DeliveryPersonResponse {
 
 @Component({
   selector: 'app-repartidor',
+  standalone: true, // Asegúrate de que esto esté aquí si es un standalone component
   imports: [CommonModule, FormsModule, ReactiveFormsModule, FontAwesomeModule, DatePipe, DecimalPipe, Modal, Searchtable, Table],
   templateUrl: './repartidor.html',
   styleUrl: './repartidor.css'
@@ -94,7 +99,6 @@ export class Repartidor implements OnInit {
       action: 'edit',
       class: 'px-3 py-1 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors'
     },
-    // Botón de ejemplo para una acción futura (ej: Cancelar/Desactivar)
     {
       label: 'Desactivar',
       icon: faBan,
@@ -111,6 +115,7 @@ export class Repartidor implements OnInit {
     private cdr: ChangeDetectorRef,
     private fb: FormBuilder
   ) {
+    // Definir los validadores iniciales (Requeridos para el modo CREAR)
     this.employeeForm = this.fb.group({
       // Datos Personales
       firstname: ['', Validators.required],
@@ -120,7 +125,7 @@ export class Repartidor implements OnInit {
       birthDate: ['', Validators.required],
       address: ['', Validators.required],
       emergencyContact: ['', Validators.required],
-      // Datos de Contrato
+      // Datos de Contrato (Solo requeridos para CREACIÓN)
       contractTypeId: [null, Validators.required],
       baseSalary: [0, [Validators.required, Validators.min(0)]],
       commissionPercentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
@@ -183,6 +188,20 @@ export class Repartidor implements OnInit {
       baseSalary: 0,
       commissionPercentage: 0
     });
+
+    // Restaurar Validadores Requeridos para CREACIÓN
+    const requiredFields = ['firstname', 'lastname', 'phoneNumber', 'dni', 'birthDate', 'address', 'emergencyContact', 'contractTypeId', 'baseSalary', 'commissionPercentage', 'endDate'];
+    requiredFields.forEach(field => {
+      const control = this.employeeForm.get(field);
+      if (control) {
+        // Se reestablece el validador Validators.required
+        control.setValidators(control.value === 'contractTypeId' ? Validators.required : [Validators.required, Validators.min(0)]);
+      }
+    });
+    this.employeeForm.get('commissionPercentage')?.setValidators([Validators.required, Validators.min(0), Validators.max(100)]);
+    this.employeeForm.updateValueAndValidity();
+
+
     // Setear el tipo de contrato con el primer valor si existe
     if (this.contractTypes.length > 0) {
       this.employeeForm.get('contractTypeId')?.setValue(this.contractTypes[0].id);
@@ -194,24 +213,38 @@ export class Repartidor implements OnInit {
     this.isEditMode = true;
     this.selectedEmployee = employee;
 
-    // NOTA: La API de GET de un solo empleado NO fue proporcionada, 
-    // por lo que rellenaremos el formulario solo con los datos básicos disponibles en la tabla.
-    // Los datos del contrato no están disponibles en la lista de empleados.
-
+    // Pre-llenar campos de datos personales (incluyendo los recién solicitados)
     this.employeeForm.patchValue({
-      // Datos Personales (simulados/parciales para edición)
       firstname: employee.firstname,
       lastname: employee.lastname,
       phoneNumber: employee.phoneNumber,
-      dni: employee.dni,
-      // Los campos birthDate, address, emergencyContact no están en la lista, se dejan vacíos si no se cargan
+      dni: employee.dni.toString(), // Convertir a string para el control del formulario
+      birthDate: employee.birthDate, // Asumiendo que ahora viene en la data
+      address: employee.address,     // Asumiendo que ahora viene en la data
+      emergencyContact: employee.emergencyContact, // Asumiendo que ahora viene en la data
 
-      // Datos de Contrato (se asume que el ID y el resto de campos deben rellenarse de nuevo)
+      // Dejar los campos de contrato vacíos, ya que no se usan en el PUT
       contractTypeId: null,
       baseSalary: 0,
       commissionPercentage: 0,
       endDate: ''
     });
+
+    // --- REMOVER VALIDACIONES REQUERIDAS PARA EDICIÓN ---
+    // Hacemos que los campos de datos personales sean opcionales
+    const fieldsToMakeOptional = ['firstname', 'lastname', 'phoneNumber', 'dni', 'birthDate', 'address', 'emergencyContact'];
+    fieldsToMakeOptional.forEach(field => {
+      this.employeeForm.get(field)?.clearValidators();
+      this.employeeForm.get(field)?.setValidators(null); // Asegura que no haya validadores
+    });
+
+    // También remover validaciones de campos de contrato
+    this.employeeForm.get('contractTypeId')?.clearValidators();
+    this.employeeForm.get('baseSalary')?.clearValidators();
+    this.employeeForm.get('commissionPercentage')?.clearValidators();
+    this.employeeForm.get('endDate')?.clearValidators();
+
+    this.employeeForm.updateValueAndValidity(); // Recalcular la validez del formulario
 
     this.isModalOpen = true;
   }
@@ -221,13 +254,15 @@ export class Repartidor implements OnInit {
     this.employeeForm.reset();
   }
 
-  // --- Lógica de Búsqueda ---
+  // --- Lógica de Búsqueda y Acciones de la Tabla ---
+
   onSearchChange(term: string) {
     this.searchTerm = term;
     this.searchEmployees(term);
   }
 
   searchEmployees(term: string) {
+    // ... (Lógica de búsqueda sin cambios)
     if (!term) {
       this.filteredEmployees = this.employees;
       return;
@@ -242,9 +277,8 @@ export class Repartidor implements OnInit {
     );
   }
 
-  // --- Lógica de Acciones de la Tabla ---
-
   handleTableAction(event: { action: string, item: Employee }): void {
+    // ... (Lógica de acciones de tabla sin cambios)
     const employee = event.item;
     switch (event.action) {
       case 'edit':
@@ -252,7 +286,6 @@ export class Repartidor implements OnInit {
         break;
       case 'toggle_active':
         console.log(`Placeholder: Desactivar/Activar empleado con ID: ${employee.userId}`);
-        // Aquí iría la lógica para llamar a la API de desactivación/activación.
         break;
       default:
         console.warn(`Acción desconocida: ${event.action}`);
@@ -262,7 +295,10 @@ export class Repartidor implements OnInit {
   // --- Lógica de Envío de Formulario (Creación/Edición) ---
 
   onSubmit() {
-    if (this.employeeForm.invalid) {
+    // En modo EDICIÓN, como se quitaron los Validators.required,
+    // el formulario.valid siempre será true si no hay otros errores.
+    // Solo validamos la validez para CREACIÓN, donde sí son requeridos.
+    if (!this.isEditMode && this.employeeForm.invalid) {
       this.employeeForm.markAllAsTouched();
       return;
     }
@@ -271,31 +307,52 @@ export class Repartidor implements OnInit {
     const headers = this.getHeaders();
     const formValue = this.employeeForm.value;
 
-    const payload = {
-      firstname: formValue.firstname,
-      lastname: formValue.lastname,
-      phoneNumber: formValue.phoneNumber,
-      dni: formValue.dni.toString(), // Asegurar que DNI sea string si la API lo pide
-      birthDate: formValue.birthDate,
-      address: formValue.address,
-      emergencyContact: formValue.emergencyContact,
-      contract: {
-        contractTypeId: formValue.contractTypeId,
-        baseSalary: formValue.baseSalary,
-        commissionPercentage: formValue.commissionPercentage,
-        endDate: formValue.endDate
-      }
-    };
-
     if (this.isEditMode && this.selectedEmployee) {
-      // Placeholder: Lógica para editar (API PUT no proporcionada)
-      console.log('Placeholder: API de edición de empleado NO disponible.', payload);
-      alert('Funcionalidad de edición no implementada. Revisar consola para payload.');
-      this.isLoadingModal = false;
-      this.closeModal();
+      // Lógica para editar (API PUT)
+      const editPayload = {
+        firstname: formValue.firstname,
+        lastname: formValue.lastname,
+        phoneNumber: formValue.phoneNumber,
+        dni: formValue.dni.toString(),
+        birthDate: formValue.birthDate,
+        address: formValue.address,
+        emergencyContact: formValue.emergencyContact
+      };
+
+      this.http.put(`${this.createEmployeeApiUrl}/${this.selectedEmployee.userId}`, editPayload, { headers })
+        .subscribe({
+          next: () => {
+            alert('Empleado actualizado exitosamente.');
+            this.loadEmployees();
+            this.isLoadingModal = false;
+            this.closeModal();
+          },
+          error: (error) => {
+            console.error('Error updating employee:', error);
+            alert('Error al actualizar empleado. Revise la consola.');
+            this.isLoadingModal = false;
+          }
+        });
 
     } else {
       // Lógica para crear
+      // (sin cambios, ya que aquí sí se requieren todos los campos de contrato y personales)
+      const payload = {
+        firstname: formValue.firstname,
+        lastname: formValue.lastname,
+        phoneNumber: formValue.phoneNumber,
+        dni: formValue.dni.toString(),
+        birthDate: formValue.birthDate,
+        address: formValue.address,
+        emergencyContact: formValue.emergencyContact,
+        contract: {
+          contractTypeId: formValue.contractTypeId,
+          baseSalary: formValue.baseSalary,
+          commissionPercentage: formValue.commissionPercentage,
+          endDate: formValue.endDate
+        }
+      };
+
       this.http.post(this.createEmployeeApiUrl, payload, { headers })
         .subscribe({
           next: () => {
