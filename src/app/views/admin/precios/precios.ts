@@ -3,16 +3,22 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Fidelizacion } from './fidelizacion/fidelizacion';
 import { Paquetes } from './paquetes/paquetes';
-
+import { Filtroseleccion } from '../../../components/shared/filtroseleccion/filtroseleccion'; 
+import { FilterOption } from '../../../interfaces/filter-option.interface';
 @Component({
   selector: 'app-precios',
-  imports: [CommonModule, FormsModule, Fidelizacion, Paquetes],
+  imports: [CommonModule, Fidelizacion, Paquetes, Filtroseleccion],
   templateUrl: './precios.html',
   styleUrl: './precios.css'
 })
 export class Precios implements OnInit {
   selectedFilter: string = 'todos';
-
+filterOptions: FilterOption[] = [
+    { value: 'todos', label: 'Todos', iconClass: 'fas fa-list-ul' },
+    { value: 'activos', label: 'Activos', iconClass: 'fas fa-check-circle' },
+    { value: 'pendientes', label: 'Pendientes', iconClass: 'fas fa-hourglass-half' },
+    { value: 'completados', label: 'Completados', iconClass: 'fas fa-clipboard-check' },
+  ];
   // Variables booleanas para controlar qué componentes mostrar
   showTodos: boolean = true;
   showActivos: boolean = false;
@@ -22,14 +28,16 @@ export class Precios implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    this.updateComponentVisibility();
+    // Inicializar la visibilidad con el valor por defecto
+    this.updateComponentVisibility(this.selectedFilter);
   }
 
-  onFilterChange(): void {
-    this.updateComponentVisibility();
+  onFilterSelected(newFilter: string): void {
+    this.selectedFilter = newFilter;
+    this.updateComponentVisibility(newFilter);
   }
 
-  updateComponentVisibility(): void {
+  updateComponentVisibility(filterValue: string): void {
     // Resetear todas las variables
     this.showTodos = false;
     this.showActivos = false;
@@ -37,7 +45,7 @@ export class Precios implements OnInit {
     this.showCompletados = false;
 
     // Activar solo la seleccionada
-    switch (this.selectedFilter) {
+    switch (filterValue) {
       case 'todos':
         this.showTodos = true;
         break;

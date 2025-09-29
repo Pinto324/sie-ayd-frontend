@@ -13,6 +13,7 @@ import { Repartidor } from './views/admin/repartidor/repartidor';
 import { Precios } from './views/admin/precios/precios';
 import { Afilacion } from './views/cliente/afilacion/afilacion';
 import { Guias } from './views/comercios/guias/guias';
+import { AsignacionCoordinador } from './views/coordinador/asignacion/asignacion';
 import { GuiasCliente } from './views/cliente/guias/guias';
 import { AuthGuard } from './services/auth.guard';
 import { AdminGuard } from './services/adminguard';
@@ -33,6 +34,10 @@ export const routes: Routes = [
   }, {
     path: 'afilacion',
     component: Afilacion,
+    canActivate: [AuthGuard]
+  },{
+    path: 'asignacioncoordinador',
+    component: AsignacionCoordinador,
     canActivate: [AuthGuard]
   }, {
     path: 'guias',

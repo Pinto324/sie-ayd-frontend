@@ -53,7 +53,7 @@ export class Usuarios implements OnInit {
 
   userForm: FormGroup;
 
-  private apiUrl = 'http://147.135.215.156:8090/api/v1/users?page=0&size=10&sortBy=id&ascending=true';
+  private apiUrl = 'http://147.135.215.156:8090/api/v1/users?page=0&size=1000&sortBy=id&ascending=true';
   private createurl = 'http://147.135.215.156:8090/api/v1/users';
   private rolesUrl = 'http://147.135.215.156:8090/api/v1/roles';
 

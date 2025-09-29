@@ -119,6 +119,14 @@ export class Dashboard implements OnInit {
         icon: 'dumpster',
         route: '/afilacion',
         roleAccess: [5]
+      },
+      {
+        id: 1,
+        title: 'Asignaciones',
+        description: 'Modulo para repartir los paquetes entre los repartidores libres!',
+        icon: 'dumpster',
+        route: '/asignacioncoordinador',
+        roleAccess: [4]
       }
     ];
   }
