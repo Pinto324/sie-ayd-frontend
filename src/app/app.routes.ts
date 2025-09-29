@@ -17,6 +17,7 @@ import { Guias } from './views/comercios/guias/guias';
 import { AsignacionRepartidor } from './views/repartidor/asignacion/asignacion';
 import { EntregasRepartidor } from './views/repartidor/entregas/entregas';
 import { AsignacionCoordinador } from './views/coordinador/asignacion/asignacion';
+import { IncidenciaCoordinador } from './views/coordinador/incidencias/incidencias';
 import { GuiasCliente } from './views/cliente/guias/guias';
 import { AuthGuard } from './services/auth.guard';
 import { AdminGuard } from './services/adminguard';
@@ -35,6 +36,10 @@ export const routes: Routes = [
     component: Dashboard,
     canActivate: [AuthGuard]
   }, {
+    path: 'IncidenciaCoordinador',
+    component: IncidenciaCoordinador,
+    canActivate: [AuthGuard]
+  },{
     path: 'afilacion',
     component: Afilacion,
     canActivate: [AuthGuard]

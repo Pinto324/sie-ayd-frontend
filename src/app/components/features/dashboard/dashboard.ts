@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faUsers, faBuilding, faMoneyCheck, faUserTie, faChartBar, faCog, faFileAlt, faPercent, faDumpster, faIdCardClip, faBoxesStacked } from '@fortawesome/free-solid-svg-icons';
+import { faUsers, faBuilding, faHammer,faMoneyCheck, faUserTie, faChartBar, faCog, faFileAlt, faPercent, faDumpster, faIdCardClip, faBoxesStacked } from '@fortawesome/free-solid-svg-icons';
 interface ModuleCard {
   id: number;
   title: string;
@@ -30,7 +30,7 @@ export class Dashboard implements OnInit {
     private library: FaIconLibrary
   ) {
     // Agregar iconos a la librería
-    library.addIcons(faUsers, faPercent, faMoneyCheck, faBuilding, faUserTie, faChartBar, faCog, faFileAlt, faDumpster, faIdCardClip, faBoxesStacked);
+    library.addIcons(faUsers, faHammer,faPercent, faMoneyCheck, faBuilding, faUserTie, faChartBar, faCog, faFileAlt, faDumpster, faIdCardClip, faBoxesStacked);
   }
 
   ngOnInit() {
@@ -153,6 +153,13 @@ export class Dashboard implements OnInit {
         description: 'Modulo para repartir los paquetes entre los repartidores libres!',
         icon: 'dumpster',
         route: '/asignacioncoordinador',
+        roleAccess: [4]
+      },{
+        id: 2,
+        title: 'Incidencias',
+        description: 'Modulo para resolver las incidencias de las entregas',
+        icon: 'hammer',
+        route: '/IncidenciaCoordinador',
         roleAccess: [4]
       },
       {

@@ -330,16 +330,12 @@ export class Repartidor implements OnInit {
             this.isLoadingModal = false;
             this.closeModal();
           },
-          error: (httpError) => {
-            let errors: string[] = ['Ocurrió un error desconocido al crear el empleado.'];
-            
-            if (httpError.error && httpError.error.errors && Array.isArray(httpError.error.errors)) {
-                errors = httpError.error.errors.map((err: any) => err.message || err);
-            } else if (httpError.error && httpError.error.message) {
-                errors = [httpError.error.message];
-            } else if (httpError.message) {
-                errors = [httpError.message];
-            }
+          error: (error) => {
+            const errors: string[] = this.authService.extractErrorMessages(
+                    error, 
+                    'Error al modificar empleado. Por favor, intente de nuevo.' // Mensaje por defecto
+                );
+            this.showAlert('danger', errors);
             this.isLoadingModal = false;
           }
         });

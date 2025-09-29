@@ -11,6 +11,7 @@ import {
   faBoxOpen,      // Recolectada
   faTruckFast,    // En Transito
   faCheckDouble,  // Finalizar Entrega
+  faScrewdriverWrench,
   faTimes         // Cerrar Modal
 } from '@fortawesome/free-solid-svg-icons';
 import { Alert } from '../../../components/shared/alert/alert';
@@ -55,7 +56,9 @@ export class EntregasRepartidor implements OnInit {
   isDeliveryModalOpen: boolean = false;
   deliveryNotes: string = '';
    deliveryFiles: (File | null)[] = [null, null, null]; // 3 espacios para URLs/Base64
-
+//Modal de Incidencia
+  isIncidenceModalOpen: boolean = false;
+  incidenceNotes: string = '';
   // Iconos
   faSearch = faSearch;
   faDetails = faEye;
@@ -64,12 +67,15 @@ export class EntregasRepartidor implements OnInit {
   faInTransit = faTruckFast;
   faDelivered = faCheckDouble;
   faTimes = faTimes;
+  faIncidence = faScrewdriverWrench;
 
 
   // URLs de la API
   private assignmentsApiUrl = 'http://147.135.215.156:8090/api/v1/assignments?status=ACCEPTED';
   private guideWorkUrl = 'http://147.135.215.156:8090/api/v1/guides/work'; // PUT para status 2 y 3
   private guideDeliverUrl = 'http://147.135.215.156:8090/api/v1/guides/deliver'; // POST para status 4
+  private guideIncidenceUrl = 'http://147.135.215.156:8090/api/v1/guides'; // NUEVO: POST para /:id/incidence
+
 
 
   constructor(
@@ -92,10 +98,8 @@ private getJsonHeaders(): HttpHeaders {
 
 private getFormDataHeaders(): HttpHeaders {
   const token = this.authService.getToken();
-  // IMPORTANTE: No establecer Content-Type manualmente
   return new HttpHeaders({
     'Authorization': `Bearer ${token}`
-    // ELIMINA completamente 'Content-Type'
   });
 }
 
@@ -109,7 +113,7 @@ private getFormDataHeaders(): HttpHeaders {
     this.http.get<Assignment[]>(this.assignmentsApiUrl, { headers: this.getJsonHeaders(), params: params }).subscribe({
       next: (response) => {
         // Filtrar guías con ID de estado relevante (2, 3, 4) para el flujo de trabajo del repartidor
-        this.assignments = response.filter(a => [2, 3, 4].includes(a.guide.status.id));
+        this.assignments = response.filter(a => [2, 3, 4, 8].includes(a.guide.status.id));
         this.isLoading = false;
         this.cdr.markForCheck();
       },
@@ -275,7 +279,46 @@ private logFormData(formData: FormData) {
       }
     }
   }
-}
+  }
+   openIncidenceModal(assignment: Assignment) {
+    this.selectedAssignment = assignment;
+    this.incidenceNotes = '';
+    this.isIncidenceModalOpen = true;
+  }
+
+  closeIncidenceModal() {
+    this.isIncidenceModalOpen = false;
+    this.selectedAssignment = null;
+    this.incidenceNotes = '';
+  }
+
+  submitIncidence() {
+    if (!this.selectedAssignment || !this.incidenceNotes.trim()) {
+      this.showAlert('info', 'Debe ingresar una descripción para la incidencia.');
+      return;
+    }
+
+    const guideId = this.selectedAssignment.guide.id;
+    const payload = { notes: this.incidenceNotes.trim() };
+    const url = `${this.guideIncidenceUrl}/${guideId}/incidence`;
+
+    if (confirm(`¿Confirma generar una incidencia para la guía #${this.selectedAssignment.guide.code}?`)) {
+      this.http.post(url, payload, { headers: this.getJsonHeaders() }).subscribe({
+        next: () => {
+          this.showAlert('success', `Incidencia generada para la guía #${this.selectedAssignment!.guide.code} exitosamente.`);
+          this.closeIncidenceModal();
+      this.loadAssignments(); 
+        },
+        error: (httpError) => {
+          const errors: string[] = this.authService.extractErrorMessages(
+            httpError, 
+            'Error al generar la incidencia. Por favor, intente de nuevo.'
+          );
+          this.showAlert('danger', errors);
+        }
+      });
+    }
+  }
         //manejo alert:
   showAlert(type: AlertType, message: string | string[]): void {
     this.alertType = type;

@@ -1,0 +1,135 @@
+<app-alert 
+  [isOpen]="isAlertModalOpen"
+  [type]="alertType"
+  [message]="alertMessage"
+  (closed)="closeAlertModal()">
+</app-alert>
+
+<div class="container mx-auto px-4 py-8">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-black flex items-center gap-3">
+        Gestión de Incidencias
+      </h1>
+      <p class="text-gray-600 dark:text-black-300 mt-2">Revisa y programa la resolución de las guías reportadas con problemas por los repartidores.</p>
+    </div>
+  </div>
+
+  <div class="flex justify-end mb-4">
+    <app-searchtable 
+      placeholder="Buscar por Guía ID, Repartidor o Descripción..."
+      (searchChange)="onSearchChange($event)">
+    </app-searchtable>
+  </div>
+
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+    @if (isLoading) {
+      <div class="p-6 text-center text-gray-500">Cargando incidencias...</div>
+    } @else if (errorMessage) {
+      <div class="p-6 text-center text-red-500">{{ errorMessage }}</div>
+    } @else if (filteredIncidences.length === 0) {
+      <div class="p-6 text-center text-gray-500">
+        @if (searchTerm) {
+          No se encontraron incidencias que coincidan con "{{ searchTerm }}".
+        } @else {
+          No hay incidencias pendientes de resolución.
+        }
+      </div>
+    } @else {
+      <app-table
+        [data]="filteredIncidences"
+        [columns]="tableColumns"
+        [actions]="tableActions"
+        (actionClick)="onActionClick($event)">
+      </app-table>
+    }
+  </div>
+</div>
+
+@if (isResolveModalOpen && selectedIncidence) {
+  <app-modal
+    [isOpen]="isResolveModalOpen"
+    [title]="'Resolver Incidencia - Guía #' + selectedIncidence.guideId"
+    (close)="closeResolveModal()"
+    size="xl" 
+  >
+    <div modal-body>
+        <div class="space-y-5">
+            <h4 class="text-md font-semibold text-gray-900 dark:text-white border-b pb-2 flex items-center gap-2">
+                <fa-icon [icon]="faResolve" class="text-red-500"></fa-icon>
+                Detalles y Reprogramación
+            </h4>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm text-gray-900 dark:text-gray-300">
+                <div>
+                    <dt class="font-medium text-gray-500">Reportado Por:</dt>
+                    <dd class="text-gray-900 dark:text-gray-300">
+                        {{ selectedIncidence.reportedBy.firstname }} {{ selectedIncidence.reportedBy.lastname }}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="font-medium text-gray-500">Email Contacto:</dt>
+                    <dd class="text-gray-900 dark:text-gray-300">
+                        {{ selectedIncidence.reportedBy.email }}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="font-medium text-gray-500">Teléfono:</dt>
+                    <dd class="text-gray-900 dark:text-gray-300">
+                        {{ selectedIncidence.reportedBy.phoneNumber }}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="font-medium text-gray-500">Fecha de Reporte:</dt>
+                    <dd class="text-gray-900 dark:text-gray-300">
+                        {{ selectedIncidence.reportedAt | date:'dd/MM/yyyy - HH:mm' }}
+                    </dd>
+                </div>
+                
+                <div class="col-span-full">
+                    <dt class="font-medium text-gray-500">Descripción de la Incidencia:</dt>
+                    <dd class="text-red-600 dark:text-red-400 font-medium whitespace-pre-wrap mt-1 p-2 bg-gray-50 dark:bg-gray-600 rounded-lg">
+                        {{ selectedIncidence.notes }}
+                    </dd>
+                </div>
+            </div>
+
+            <h4 class="text-md font-semibold text-gray-900 dark:text-white border-b pb-2 pt-3">Acción de Resolución</h4>
+            
+            <form id="resolve-form" (ngSubmit)="submitResolution()">
+                <label for="reschedule-date" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    Fecha de Reprogramación para el Reparto <span class="text-red-500">*</span>
+                </label>
+                <input 
+                  type="date" 
+                  id="reschedule-date"
+                  [required]="true"
+                  [(ngModel)]="rescheduleDate" 
+                  name="rescheduleDate"
+                  class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                >
+            </form>
+
+            <p class="text-xs text-gray-500 dark:text-gray-400">Al resolver, la guía se marcará como pendiente de reasignación y se podrá incluir en una nueva ruta.</p>
+
+        </div>
+    </div>
+
+    <div modal-footer class="flex justify-end">
+      <button 
+          (click)="closeResolveModal()"
+          type="button"
+          class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600">
+          Cancelar
+      </button>
+      <button 
+          type="submit"
+          form="resolve-form"
+          [disabled]="!rescheduleDate"
+          class="text-white inline-flex items-center bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 ml-3 disabled:opacity-50">
+          <fa-icon [icon]="faResolve" class="mr-2"></fa-icon>
+          Confirmar Resolución
+      </button>
+    </div>
+  </app-modal>
+}

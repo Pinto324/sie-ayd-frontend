@@ -260,8 +260,12 @@ openEditModal(user: User) {
           next: () => {
             this.loadUsers();
           },
-          error: (error) => {
-            console.error('Error deleting user:', error);
+          error: (httpError) => {
+            const errors: string[] = this.authService.extractErrorMessages(
+                    httpError, 
+                    'Error al inactivar empleado. Por favor, intente de nuevo.' // Mensaje por defecto
+                );
+            this.showAlert('danger', errors);
           }
         });
     }
@@ -277,7 +281,11 @@ openEditModal(user: User) {
           user.active = newStatus;
         },
         error: (error) => {
-          console.error('Error updating user status:', error);
+          const errors: string[] = this.authService.extractErrorMessages(
+                    error, 
+                    'Error al modificar empleado. Por favor, intente de nuevo.' // Mensaje por defecto
+                );
+            this.showAlert('danger', errors);
         }
       });
   }
