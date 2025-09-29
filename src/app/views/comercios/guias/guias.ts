@@ -51,6 +51,7 @@ interface Guide {
   type: PackageType;
   createdAt: string;
   updatedAt: string;
+  deliveryDate: string;
 }
 
 @Component({
@@ -124,7 +125,8 @@ export class Guias {
       recipientAddress: ['', Validators.required],
       recipientPhone: [''],
       recipientEmail: ['', [Validators.required, Validators.email]],
-      packageDescription: ['']
+      packageDescription: [''],
+      deliveryDate: ['', Validators.required]
     });
   }
 
@@ -217,7 +219,8 @@ export class Guias {
       recipientAddress: guide.address,
       recipientPhone: guide.phone,
       recipientEmail: guide.email,
-      packageDescription: guide.description
+      packageDescription: guide.description,
+      deliveryDate: guide.deliveryDate
     });
     this.isModalOpen = true;
   }
@@ -237,7 +240,8 @@ export class Guias {
         recipientAddress: formData.recipientAddress,
         recipientPhone: formData.recipientPhone,
         recipientEmail: formData.recipientEmail,
-        packageDescription: formData.packageDescription
+        packageDescription: formData.packageDescription,
+        deliveryDate: formData.deliveryDate
       };
 
       if (this.isEditMode && this.selectedGuide) {
