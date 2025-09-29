@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import {Component, ChangeDetectorRef, ChangeDetectionStrategy, ElementRef, ViewChild} from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '../../../components/shared/button/button';
@@ -24,7 +24,13 @@ export class Afilacion {
   registerError: string | null = null;
   registerTrue: string | null = null;
 
-  private apiUrl = 'http://147.135.215.156:8090/api/v1/commerce/register';
+  @ViewChild('logoInput') logoInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('pdfInput') pdfInput!: ElementRef<HTMLInputElement>;
+
+  selectedLogo: File | null = null;
+  selectedPdf: File | null = null;
+
+  private apiUrl = 'http://147.135.215.156:8090/api/v1/commerce';
 
   constructor(
     private fb: FormBuilder,
@@ -47,9 +53,21 @@ export class Afilacion {
     const token = this.authService.getToken();
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
     });
   }
+
+  onLogoChange(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0] || null;
+    this.selectedLogo = file;
+    this.commerceRegisterForm.patchValue({ logo: file });
+  }
+
+  onPdfChange(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0] || null;
+    this.selectedPdf = file;
+    this.commerceRegisterForm.patchValue({ validationFile: file });
+  }
+
   onSubmit() {
     this.registerError = null;
     this.registerTrue = null;
@@ -59,7 +77,26 @@ export class Afilacion {
       const headers = this.getHeaders();
       const commerceData = this.commerceRegisterForm.value;
 
-      this.http.post(this.apiUrl, commerceData, { headers })
+      const formData = new FormData();
+      formData.append('data', new Blob([JSON.stringify(commerceData)], {
+        type: 'application/json'
+      }));
+
+      if (this.selectedLogo) {
+        formData.append('logo', this.selectedLogo);
+      }
+      if (this.selectedPdf) {
+        formData.append('file', this.selectedPdf);
+      }
+
+      if (!this.selectedLogo || !this.selectedPdf) {
+        this.isLoading = false;
+        this.registerError = 'Por favor, selecciona tanto el logo como el archivo PDF.';
+        this.cdr.detectChanges();
+        return;
+      }
+
+      this.http.post(this.apiUrl, formData, { headers })
         .subscribe({
           next: (response: any) => {
             this.isLoading = false;
