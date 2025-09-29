@@ -103,6 +103,20 @@ export class Dashboard implements OnInit {
         icon: 'money-check',
         route: '/guias',
         roleAccess: [2]
+      },{
+        id: 1,
+        title: 'Solicitud de paquetes',
+        description: 'Revisa y controla todos las solicitudes de paquetes que tienes asignadas!.',
+        icon: 'dumpster',
+        route: '/asignacionrepartidor',
+        roleAccess: [3]
+      },{
+        id: 1,
+        title: 'Asignaciones',
+        description: 'Modulo para repartir los paquetes entre los repartidores libres!',
+        icon: 'dumpster',
+        route: '/asignacioncoordinador',
+        roleAccess: [4]
       },
       {
         id: 1,
@@ -119,14 +133,6 @@ export class Dashboard implements OnInit {
         icon: 'dumpster',
         route: '/afilacion',
         roleAccess: [5]
-      },
-      {
-        id: 1,
-        title: 'Asignaciones',
-        description: 'Modulo para repartir los paquetes entre los repartidores libres!',
-        icon: 'dumpster',
-        route: '/asignacioncoordinador',
-        roleAccess: [4]
       }
     ];
   }

@@ -1,0 +1,168 @@
+<div class="container mx-auto px-4 py-8">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-black">Mis Asignaciones</h1>
+      <p class="text-gray-600 dark:text-black-300 mt-2">Guías asignadas a tu cuenta de repartidor.</p>
+    </div>
+    
+    <div class="flex gap-4 mt-4 md:mt-0">
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <fa-icon [icon]="faSearch" class="text-gray-500"></fa-icon>
+        </div>
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          (input)="onSearchChange(searchTerm)"
+          class="pl-10 p-2.5 border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+          placeholder="Buscar guía o comercio..."
+        >
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+    @if (isLoading) {
+      <div class="p-6 text-center text-gray-500">Cargando asignaciones...</div>
+    } @else if (errorMessage) {
+      <div class="p-6 text-center text-red-500">{{ errorMessage }}</div>
+    } @else if (filteredAssignments.length === 0) {
+      <div class="p-6 text-center text-gray-500">No tienes asignaciones disponibles o el filtro no coincide.</div>
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+          <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+              <th scope="col" class="px-6 py-3">Guía #</th>
+              <th scope="col" class="px-6 py-3">Comercio</th>
+              <th scope="col" class="px-6 py-3">Destinatario</th>
+              <th scope="col" class="px-6 py-3">Dirección</th>
+              <th scope="col" class="px-6 py-3">Precio</th>
+              <th scope="col" class="px-6 py-3">Estado Asignación</th>
+              <th scope="col" class="px-6 py-3">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of filteredAssignments; track item.id) {
+              <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
+                  [class]="{'bg-yellow-50 dark:bg-yellow-900/50': item.status === 'PENDING'}">
+                
+                <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                  {{ item.guide.code }}
+                </td>
+                <td class="px-6 py-4">{{ item.guide.commerce.name }}</td>
+                <td class="px-6 py-4">{{ item.guide.recipient }}</td>
+                <td class="px-6 py-4">{{ item.guide.address }}</td>
+                <td class="px-6 py-4">${{ item.guide.price | number: '1.2-2' }}</td>
+                <td class="px-6 py-4">
+                  <span [class]="{'text-orange-500 font-bold': item.status === 'PENDING', 'text-green-500': item.status === 'ACCEPTED', 'text-red-500': item.status === 'CANCELLED'}">
+                    {{ item.status }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 flex gap-2">
+                  <button 
+                    (click)="openDetailModal(item)"
+                    class="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors flex items-center text-xs">
+                    <fa-icon [icon]="faDetails" class="mr-1"></fa-icon>
+                    Detalles
+                  </button>
+
+                  @if (item.status === 'PENDING') {
+                    <button 
+                      (click)="acceptAssignment(item.id)"
+                      class="px-3 py-1 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors flex items-center text-xs">
+                      <fa-icon [icon]="faAccept" class="mr-1"></fa-icon>
+                      Aceptar
+                    </button>
+                    <button 
+                      (click)="rejectAssignment(item.id)"
+                      class="px-3 py-1 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors flex items-center text-xs">
+                      <fa-icon [icon]="faReject" class="mr-1"></fa-icon>
+                      Rechazar
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
+
+@if (isDetailModalOpen) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700 w-full max-w-lg mx-4">
+      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+          @if (selectedAssignmentDetail) {
+            Detalles de la Guía #{{ selectedAssignmentDetail.guide.code }}
+          } @else {
+            Detalles de la Guía
+          }
+        </h3>
+        <button 
+          (click)="closeDetailModal()"
+          type="button" 
+          class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+          <fa-icon [icon]="faReject"></fa-icon>
+        </button>
+      </div>
+
+      <div class="p-4 md:p-5 space-y-4">
+        @if (!selectedAssignmentDetail) {
+          <p class="text-center text-gray-500">Cargando detalles...</p>
+        } @else {
+          <div class="flex items-center gap-4 border-b pb-3 mb-3 border-gray-200 dark:border-gray-600">
+            @if (selectedAssignmentDetail.guide.commerce.logo) {
+                <img [src]="selectedAssignmentDetail.guide.commerce.logo" class="w-12 h-12 rounded-full object-cover" [alt]="selectedAssignmentDetail.guide.commerce.name">
+            }
+            <div>
+                <h4 class="text-md font-bold text-gray-900 dark:text-white">{{ selectedAssignmentDetail.guide.commerce.name }}</h4>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Comercio remitente</p>
+            </div>
+          </div>
+          
+          <dl class="space-y-2 text-sm text-gray-900 dark:text-gray-300">
+            <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-600 pb-1">
+              <dt class="font-medium">Destinatario:</dt><dd>{{ selectedAssignmentDetail.guide.recipient }}</dd>
+            </div>
+            <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-600 pb-1">
+              <dt class="font-medium">Dirección:</dt><dd>{{ selectedAssignmentDetail.guide.address }}</dd>
+            </div>
+            <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-600 pb-1">
+              <dt class="font-medium">Teléfono Destino:</dt><dd>{{ selectedAssignmentDetail.guide.phone }}</dd>
+            </div>
+            <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-600 pb-1">
+              <dt class="font-medium">Precio:</dt><dd>${{ selectedAssignmentDetail.guide.price | number: '1.2-2' }}</dd>
+            </div>
+            <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-600 pb-1">
+                <dt class="font-medium">Tipo de Paquete:</dt><dd>{{ selectedAssignmentDetail.guide.type.name }}</dd>
+            </div>
+            <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-600 pb-1">
+              <dt class="font-medium">Estado Guía:</dt><dd>{{ selectedAssignmentDetail.guide.status.name }}</dd>
+            </div>
+          </dl>
+
+          <h5 class="text-base font-bold text-gray-900 dark:text-white pt-2">Detalles de Asignación</h5>
+          <dl class="space-y-2 text-sm text-gray-900 dark:text-gray-300">
+            <div class="flex items-start justify-between border-b border-gray-100 dark:border-gray-600 pb-1">
+              <dt class="font-medium">Notas:</dt><dd class="text-right max-w-xs">{{ selectedAssignmentDetail.notes || 'N/A' }}</dd>
+            </div>
+            <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-600 pb-1">
+              <dt class="font-medium">Asignado Por:</dt><dd>{{ selectedAssignmentDetail.assignedBy.firstname }} {{ selectedAssignmentDetail.assignedBy.lastname }}</dd>
+            </div>
+          </dl>
+        }
+      </div>
+      <div class="flex justify-end p-4 md:p-5 border-t border-gray-200 dark:border-gray-600">
+        <button 
+          (click)="closeDetailModal()"
+          class="text-white bg-blue-600 hover:bg-blue-700 rounded-lg text-sm px-5 py-2.5">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+}

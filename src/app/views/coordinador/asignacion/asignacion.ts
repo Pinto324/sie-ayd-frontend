@@ -15,7 +15,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { Filtroseleccion } from '../../../components/shared/filtroseleccion/filtroseleccion'; 
 import { FilterOption } from '../../../interfaces/filter-option.interface';  
-
+import { Alert } from '../../../components/shared/alert/alert';
+import { AlertType } from '../../../components/shared/alert/alert-type.type';
 interface Status { id: number; name: string; description: string; }
 interface PackageType { id: number; name: string; description: string; basePrice: number; }
 interface AssignedBy { id: number; firstname: string; lastname: string; email: string; phoneNumber: string; }
@@ -41,13 +42,15 @@ interface DeliveryPersonDetail {
 }
 @Component({
   selector: 'app-asignacion',
-  imports: [CommonModule, FormsModule, FontAwesomeModule, DatePipe, DecimalPipe, Filtroseleccion],
+  imports: [CommonModule, FormsModule, FontAwesomeModule, DatePipe, DecimalPipe, Alert,Filtroseleccion],
   templateUrl: './asignacion.html',
   styleUrl: './asignacion.css'
 })
 export class AsignacionCoordinador implements OnInit {
    viewMode: 'pending_guides' | 'all_assignments' | 'available_personnel' = 'pending_guides';
-  
+  isAlertModalOpen: boolean = false;
+  alertType: AlertType = 'info';
+  alertMessage: string | string[] = '';
   // Reemplazar las opciones de filtro existentes por las del componente compartido
   filterOptions: FilterOption[] = [
     { value: 'pending_guides', label: 'Guías Pendientes', iconClass: 'fas fa-box' },
@@ -203,13 +206,20 @@ export class AsignacionCoordinador implements OnInit {
 
     this.http.post(this.assignManualUrl, payload, { headers: this.getHeaders() }).subscribe({
       next: () => {
-        alert('Guía asignada exitosamente.');
+        this.showAlert('success', 'Guía asignada exitosamente.');
         this.isAssigning = false;
         this.goBack(); // Volver a la vista principal (Guías Pendientes)
       },
       error: (error) => {
-        console.error('Error al asignar guía:', error);
-        alert('Error al asignar la guía. Verifique la consola.');
+        let errors: string[] = ['Ocurrió un error desconocido.'];
+          if (error.error && error.error.errors && Array.isArray(error.error.errors)) {
+          // Si el backend devuelve un array de errores de validación
+          errors = error.error.errors.map((err: any) => err.message || err);
+        } else if (error.error && error.error.message) {
+           // Si el backend devuelve un mensaje de error principal
+           errors = [error.error.message];
+        }
+           this.showAlert('danger', errors);
         this.isAssigning = false;
       }
     });
@@ -227,13 +237,20 @@ export class AsignacionCoordinador implements OnInit {
 
       this.http.post(this.assignRandomUrl, payload, { headers: this.getHeaders() }).subscribe({
         next: () => {
-          alert('Guía asignada aleatoriamente.');
+          this.showAlert('success', 'Guía asignada exitosamente.');
           this.isAssigning = false;
           this.goBack(); // Volver a la vista principal (Guías Pendientes)
         },
         error: (error) => {
-          console.error('Error al asignar aleatoriamente:', error);
-          alert('Error al asignar aleatoriamente. Verifique la consola.');
+          let errors: string[] = ['Ocurrió un error desconocido.'];
+          if (error.error && error.error.errors && Array.isArray(error.error.errors)) {
+          // Si el backend devuelve un array de errores de validación
+          errors = error.error.errors.map((err: any) => err.message || err);
+        } else if (error.error && error.error.message) {
+           // Si el backend devuelve un mensaje de error principal
+           errors = [error.error.message];
+        }
+           this.showAlert('danger', errors);
           this.isAssigning = false;
         }
       });
@@ -246,7 +263,7 @@ export class AsignacionCoordinador implements OnInit {
     if (confirm('¿Estás seguro de que quieres cancelar esta asignación?')) {
       this.http.post(`${this.cancelAssignmentUrl}/${assignmentId}`, {}, { headers: this.getHeaders() }).subscribe({
         next: () => {
-          alert('Asignación cancelada exitosamente.');
+          this.showAlert('success', 'Asignación cancelada exitosamente.');
           this.loadAllAssignments(); // Recarga la tabla de todas las asignaciones
         },
         error: (error) => {
@@ -288,5 +305,15 @@ export class AsignacionCoordinador implements OnInit {
     this.isPersonnelModalOpen = false;
     this.selectedPersonnelDetail = null;
   }
-  
+  //manejo modal:
+  showAlert(type: AlertType, message: string | string[]): void {
+    this.alertType = type;
+    this.alertMessage = message;
+    this.isAlertModalOpen = true;
+    this.cdr.markForCheck();
+  }
+  closeAlertModal(): void {
+    this.isAlertModalOpen = false;
+    this.alertMessage = '';
+  }
 }
