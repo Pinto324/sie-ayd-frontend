@@ -1,0 +1,119 @@
+<app-alert 
+  [isOpen]="isAlertModalOpen"
+  [type]="alertType"
+  [message]="alertMessage"
+  (closed)="closeAlertModal()">
+</app-alert>
+<div class="container mx-auto px-4 py-8">
+    @if(isAdminUserSpecific){
+        <button 
+          (click)="onBackClick()"
+          class="flex items-center px-3 py-1 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors">
+            <fa-icon [icon]="faArrowLeft" class="mr-2"></fa-icon>
+            Volver
+        </button>
+    }  
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-black flex items-center gap-3">
+                <fa-icon [icon]="faFileInvoiceDollar" class="text-blue-600"></fa-icon>
+                {{ getViewTitle() }}
+            </h1>
+            <p class="text-gray-600 dark:text-black-300 mt-2">{{ getViewDescription() }}</p>
+        </div>
+
+        <div class="flex gap-4 mt-4 md:mt-0">
+            <app-searchtable 
+                placeholder="Buscar por referencia, método o estado..." 
+                [initialTerm]="searchTerm"
+                (searchChange)="onSearchChange($event)">
+            </app-searchtable>
+              @if (isAdmin) {
+  <button 
+      (click)="openPaymentModal()"
+      class="flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 transition-colors font-medium text-sm">
+      <fa-icon [icon]="faMoneyBillWave"></fa-icon>
+      Realizar Pago
+  </button>
+            }
+        </div>
+    </div>
+
+    @if (isLoading) {
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden p-6 text-center text-gray-500">
+            Cargando historial de pagos...
+        </div>
+    } @else if (errorMessage) {
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden p-6 text-center text-red-500 border border-red-300">
+            {{ errorMessage }}
+        </div>
+    } @else if (filteredPayments.length === 0) {
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden p-6 text-center text-gray-500">
+            No se encontraron pagos para el criterio de búsqueda o el usuario.
+        </div>
+    } @else {
+        <app-table 
+            [data]="filteredPayments" 
+            [columns]="tableColumns" 
+            [actions]="[]">
+        </app-table>
+    }
+</div>
+<app-modal 
+  [isOpen]="isPaymentModalOpen" 
+  title="Confirmación de Pago a Repartidor" 
+  size="lg"
+  (close)="closePaymentModal()">
+  
+  <div modal-body>
+    @if (deliveryPerson) {
+      <div class="space-y-4">
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Detalles del Empleado</h3>
+        
+        <div class="grid grid-cols-2 gap-4 text-sm dark:text-white">
+          <p><strong>Nombre:</strong> {{ deliveryPerson.firstname }} {{ deliveryPerson.lastname }}</p>
+          <p><strong>Tipo Contrato:</strong> <span class="font-bold">{{ deliveryPerson.contract.contractType }}</span></p>
+          <p><strong>Fecha Inicio:</strong> {{ deliveryPerson.contract.startDate | date: 'shortDate' }}</p>
+          <p><strong>Fecha Fin:</strong> {{ deliveryPerson.contract.endDate | date: 'shortDate' }}</p>
+          <p><strong>Estado Contrato:</strong> {{ deliveryPerson.contract.contractStatus }}</p>
+          <p><strong>Comisiones Pendientes:</strong> ${{ deliveryPerson.commissions | number: '1.2-2' }}</p>
+          
+          @if (deliveryPerson.contract.contractType === 'POR_HORAS') {
+            <p><strong>Salario Base (por hora):</strong> ${{ deliveryPerson.contract.baseSalary | number: '1.2-2' }}</p>
+            <p><strong>Horas Trabajadas:</strong> {{ deliveryPerson.hours / 60 | number: '1.2-2' }} hrs</p>
+          } @else {
+            <p><strong>Salario Base (fijo):</strong> ${{ deliveryPerson.contract.baseSalary | number: '1.2-2' }}</p>
+          }
+        </div>
+        
+        <div class="p-4 bg-green-50 dark:bg-green-900 border-l-4 border-green-500 rounded-lg mt-6">
+          <p class="text-lg font-bold text-gray-900 dark:text-white flex items-center justify-between">
+            <span>Total a Pagar:</span> 
+            <span class="text-2xl text-green-600">${{ totalPayable | number: '1.2-2' }}</span>
+          </p>
+          <p class="text-sm text-gray-700 dark:text-gray-300 mt-1">Este monto incluye el salario base (calculado por hora si aplica) y las comisiones pendientes.</p>
+        </div>
+
+      </div>
+    } @else {
+      <p class="text-center text-red-500">Cargando detalles del empleado...</p>
+    }
+  </div>
+  
+  <div modal-footer class="flex justify-end w-full gap-2">
+    <button 
+        (click)="closePaymentModal()"
+        type="button"
+        class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600">
+        Cancelar
+    </button>
+    <button 
+        (click)="performPayment()"
+        [disabled]="totalPayable <= 0"
+        type="button"
+        class="text-white inline-flex items-center bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center disabled:opacity-50 disabled:cursor-not-allowed">
+        <fa-icon [icon]="faMoneyBillWave" class="me-2"></fa-icon>
+        Realizar Pago
+    </button>
+  </div>
+</app-modal>

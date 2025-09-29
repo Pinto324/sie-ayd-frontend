@@ -12,9 +12,12 @@ import { Sucursal } from './views/admin/sucursal/sucursal';
 import { fidelizacioncomercio } from './views/comercios/fidelizacion/fidelizacion';
 import { Repartidor } from './views/admin/repartidor/repartidor';
 import { Precios } from './views/admin/precios/precios';
+import { Reportes } from './views/admin/reportes/reportes';
 import { Afilacion } from './views/cliente/afilacion/afilacion';
 import { Guias } from './views/comercios/guias/guias';
 import { AsignacionRepartidor } from './views/repartidor/asignacion/asignacion';
+import { pagosrepartidor } from './views/repartidor/pagos/pagos';
+import { CajaComercio } from './views/comercios/caja/caja';
 import { EntregasRepartidor } from './views/repartidor/entregas/entregas';
 import { AsignacionCoordinador } from './views/coordinador/asignacion/asignacion';
 import { IncidenciaCoordinador } from './views/coordinador/incidencias/incidencias';
@@ -22,6 +25,7 @@ import { FidelizacionCoordinador } from './views/coordinador/fidelizacion/fideli
 import { GuiasCliente } from './views/cliente/guias/guias';
 import { AuthGuard } from './services/auth.guard';
 import { AdminGuard } from './services/adminguard';
+import { Ajustes } from './components/shared/view/ajustes/ajustes';
 
 export const routes: Routes = [
   { path: '', component: Inicio },
@@ -37,6 +41,18 @@ export const routes: Routes = [
     component: Dashboard,
     canActivate: [AuthGuard]
   }, {
+    path: 'Ajustes',
+    component: Ajustes,
+    canActivate: [AuthGuard]
+  }, {
+    path: 'pagosrepartidor',
+    component: pagosrepartidor,
+    canActivate: [AuthGuard]
+  },{
+    path: 'cajacomercios',
+    component: CajaComercio,
+    canActivate: [AuthGuard]
+  },{
     path: 'IncidenciaCoordinador',
     component: IncidenciaCoordinador,
     canActivate: [AuthGuard]
@@ -76,6 +92,10 @@ export const routes: Routes = [
 
   // Ruta protegida para administradores
   {
+    path: 'ModuloReportes',
+    component: Reportes,
+    canActivate: [AuthGuard, AdminGuard]
+  },{
     path: 'ModuloUsuario',
     component: Usuarios,
     canActivate: [AuthGuard, AdminGuard]

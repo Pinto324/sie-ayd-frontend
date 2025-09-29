@@ -22,19 +22,27 @@
                     @for (column of columns; track column.key) {
                     <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
 
-                        @switch (column.type) {
+@switch (column.type) {
                         @case ('currency') {
-                        ${{ getCellValue(item, column) | number: (column.pipeFormat || '1.2-2') }}
+                        ${{ getCellValue(item, column) | currency: 'USD' : 'symbol' : column.pipeFormat || '1.2-2' }}
                         }
                         @case ('date') {
-                        {{ getCellValue(item, column) | date: (column.pipeFormat || 'dd/MM/yyyy - HH:mm') }}
+                        {{ getCellValue(item, column) | date: column.pipeFormat || 'short' }}
                         }
                         @case ('iconStatus') {
-                        <div class="flex items-center gap-2">
-                            @if (statusIcons[item.status.id]) {
-                            <fa-icon [icon]="statusIcons[item.status.id]" class="w-4 h-4"></fa-icon>
+                        }
+                        @case ('nested') {
+                        {{ getCellValue(item, column) }}
+                        }
+                        @case ('custom') { 
+                        <div class="flex items-center">
+                            @if (getCellValue(item, column)) {
+                                <img [src]="getCellValue(item, column)" 
+                                     alt="Logo del comercio" 
+                                     class="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-200">
+                            } @else {
+                                <span class="text-xs text-gray-500">Sin Logo</span>
                             }
-                            <span>{{ item.status.name }}</span>
                         </div>
                         }
                         @default {

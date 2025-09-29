@@ -5,7 +5,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../services/auth'; // Asegúrate de que la ruta sea correcta
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
-  faPlus, faEdit, faSearch, faUserTie, faBan,faFileContract, faArrowLeft
+  faPlus, faEdit, faSearch, faUserTie, faBan,faFileContract, faArrowLeft, faMoneyBill, faFileInvoiceDollar
 } from '@fortawesome/free-solid-svg-icons';
 
 // Importar componentes compartidos (Ajustar las rutas según tu proyecto)
@@ -14,6 +14,7 @@ import { Searchtable } from '../../../components/shared/searchtable/searchtable'
 import { Table, TableColumn, TableAction } from '../../../components/shared/table/table';
 import { Alert } from '../../../components/shared/alert/alert';
 import { AlertType } from '../../../components/shared/alert/alert-type.type';
+import { Historialpagos } from '../../../components/shared/view/historialpagos/historialpagos';
 // --- Interfaces para Empleados y Tipos de Contrato ---
 
 interface ContractType {
@@ -47,6 +48,7 @@ interface Employee {
   birthDate: string;
   address: string;
   emergencyContact: string;
+  settlementDate: string;
 }
 
 interface DeliveryPersonDetail extends Employee {
@@ -73,14 +75,16 @@ interface ContractHistoryResponse {
 @Component({
   selector: 'app-repartidor',
   standalone: true, // Asegúrate de que esto esté aquí si es un standalone component
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Alert,FontAwesomeModule, DatePipe, DecimalPipe, Modal, Searchtable, Table],
+  imports: [CommonModule, FormsModule, Historialpagos,ReactiveFormsModule, Alert,FontAwesomeModule, DatePipe, DecimalPipe, Modal, Searchtable, Table],
   templateUrl: './repartidor.html',
   styleUrl: './repartidor.css'
 })
 export class Repartidor implements OnInit {
-  viewMode: 'table' | 'contracts' = 'table'; 
+  viewMode: 'historial'|'table' | 'contracts' = 'table'; 
   // Datos y Estados
   employees: Employee[] = [];
+  idEmpleadoHistorial: number = 0;
+  idEmpleadoPagos: number = 0;
   filteredEmployees: Employee[] = [];
   contractTypes: ContractType[] = [];
   searchTerm: string = '';
@@ -104,6 +108,8 @@ export class Repartidor implements OnInit {
   faBan = faBan;
 faFileContract = faFileContract; // NUEVO
   faArrowLeft = faArrowLeft;  
+  faMoneyBill = faMoneyBill;
+  faFileInvoiceDollar = faFileInvoiceDollar;
   // --- Estados de Modales y Datos de Contratos ---
   selectedDeliveryPersonDetail: DeliveryPersonDetail | null = null; // NUEVO: Detalle completo del repartidor
   isContractModalOpen: boolean = false; // NUEVO: Modal de Contratos
@@ -133,8 +139,8 @@ contractModalMode: 'nuevo' | 'renovar' = 'nuevo';
     { key: 'contractType', header: 'Tipo de Contrato', type: 'text' },
     { key: 'baseSalary', header: 'Salario Base', type: 'currency', pipeFormat: '1.2-2' },
     { key: 'commissionPercentage', header: '% Comisión', type: 'text' },
-    { key: 'startDate', header: 'Inicio', type: 'date', pipeFormat: 'shortDate' },
-    { key: 'endDate', header: 'Fin', type: 'date', pipeFormat: 'shortDate' },
+    { key: 'startDate', header: 'Inicio', type: 'date', pipeFormat: 'dd/MM/yyyy'},
+    { key: 'endDate', header: 'Fin', type: 'date', pipeFormat: 'dd/MM/yyyy' },
     { key: 'contractStatus', header: 'Estado', type: 'text' },
   ];
 
@@ -150,8 +156,15 @@ tableActions: TableAction[] = [
       icon: faFileContract,
       action: 'view_contracts',
       class: 'px-3 py-1 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors'
+    },
+    { // NUEVA ACCIÓN historial de contratos
+      label: 'Pagos',
+      icon: faFileInvoiceDollar,
+      action: 'view_historial',
+      class: 'px-3 py-1 bg-purple-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors'
     }
   ];
+
   // ----------------------------------------
 
   constructor(
@@ -161,21 +174,22 @@ tableActions: TableAction[] = [
     private fb: FormBuilder
   ) {
     // Definir los validadores iniciales (Requeridos para el modo CREAR)
-    this.employeeForm = this.fb.group({
-      // Datos Personales
-      firstname: ['', Validators.required],
-      lastname: ['', Validators.required],
-      phoneNumber: ['', Validators.required],
-      dni: ['', Validators.required],
-      birthDate: ['', Validators.required],
-      address: ['', Validators.required],
-      emergencyContact: ['', Validators.required],
-      // Datos de Contrato (Solo requeridos para CREACIÓN)
-      contractTypeId: [null, Validators.required],
-      baseSalary: [0, [Validators.required, Validators.min(0)]],
-      commissionPercentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
-      endDate: ['', Validators.required]
-    });
+this.employeeForm = this.fb.group({
+  // Datos Personales
+  firstname: ['', Validators.required],
+  lastname: ['', Validators.required],
+  phoneNumber: ['', Validators.required],
+  dni: ['', Validators.required],
+  birthDate: ['', Validators.required],
+  address: ['', Validators.required],
+  emergencyContact: ['', Validators.required],
+  // Datos de Contrato (Solo requeridos para CREACIÓN)
+  contractTypeId: [null, Validators.required],
+  baseSalary: [0, [Validators.required, Validators.min(0)]],
+  commissionPercentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
+  endDate: ['', Validators.required]
+  // Quitamos settlementDate ya que no existe en el POST
+});
      this.contractForm = this.fb.group({
       contractTypeId: [null],
       baseSalary: [0],
@@ -231,34 +245,37 @@ tableActions: TableAction[] = [
 
   // --- Modal y Formulario ---
 
-  openCreateModal() {
-    this.isEditMode = false;
-    this.selectedEmployee = null;
-    this.employeeForm.reset({
-      // Valores por defecto
-      baseSalary: 0,
-      commissionPercentage: 0
-    });
+openCreateModal() {
+  this.isEditMode = false;
+  this.selectedEmployee = null;
+  this.employeeForm.reset({
+    // Valores por defecto
+    baseSalary: 0,
+    commissionPercentage: 0
+  });
 
-    // Restaurar Validadores Requeridos para CREACIÓN
-    const requiredFields = ['firstname', 'lastname', 'phoneNumber', 'dni', 'birthDate', 'address', 'emergencyContact', 'contractTypeId', 'baseSalary', 'commissionPercentage', 'endDate'];
-    requiredFields.forEach(field => {
-      const control = this.employeeForm.get(field);
-      if (control) {
-        // Se reestablece el validador Validators.required
-        control.setValidators(control.value === 'contractTypeId' ? Validators.required : [Validators.required, Validators.min(0)]);
+   // Restaurar Validadores Requeridos para CREACIÓN
+  const requiredFields = ['firstname', 'lastname', 'phoneNumber', 'dni', 'birthDate', 'address', 'emergencyContact', 'contractTypeId', 'baseSalary', 'commissionPercentage', 'endDate'];
+  requiredFields.forEach(field => {
+    const control = this.employeeForm.get(field);
+    if (control) {
+      control.setValidators(Validators.required);
+      if (field === 'commissionPercentage') {
+        control.setValidators([Validators.required, Validators.min(0), Validators.max(100)]);
+      } else if (field === 'baseSalary') {
+        control.setValidators([Validators.required, Validators.min(0)]);
       }
-    });
-    this.employeeForm.get('commissionPercentage')?.setValidators([Validators.required, Validators.min(0), Validators.max(100)]);
-    this.employeeForm.updateValueAndValidity();
-
-
-    // Setear el tipo de contrato con el primer valor si existe
-    if (this.contractTypes.length > 0) {
-      this.employeeForm.get('contractTypeId')?.setValue(this.contractTypes[0].id);
     }
-    this.isModalOpen = true;
+  });
+  this.employeeForm.updateValueAndValidity();
+
+  // Setear el tipo de contrato con el primer valor si existe
+  if (this.contractTypes.length > 0) {
+    this.employeeForm.get('contractTypeId')?.setValue(this.contractTypes[0].id);
   }
+  this.isModalOpen = true;
+  this.cdr.markForCheck();
+}
 
   openEditModal(employee: Employee) {
     this.isEditMode = true;
@@ -298,6 +315,7 @@ tableActions: TableAction[] = [
     this.employeeForm.updateValueAndValidity(); // Recalcular la validez del formulario
 
     this.isModalOpen = true;
+    this.cdr.markForCheck();
   }
 
   closeModal() {
@@ -329,10 +347,12 @@ tableActions: TableAction[] = [
   }
 
 handleTableAction(event: { action: string, item: Employee }) {
-    if (event.action === 'edit') {
+  if (event.action === 'edit') {
       this.openEditModal(event.item);
     } else if (event.action === 'view_contracts') {
-      this.loadDeliveryPersonContracts(event.item.userId,event.item); // Llama a la nueva lógica
+      this.loadDeliveryPersonContracts(event.item.userId, event.item); // Llama a la nueva lógica
+    } else if (event.action === 'view_historial') { 
+      this.abrirhistorialPagos(event.item);
     }
   }
  /**
@@ -369,7 +389,8 @@ handleTableAction(event: { action: string, item: Employee }) {
                 }); 
                 this.viewMode = 'contracts'; // Cambia la vista solo al tener todo cargado
                 this.isLoadingData = false;
-                this.cdr.markForCheck();
+            this.cdr.markForCheck();
+                    console.log(historyResponse);
             },
             error: (httpError) => {
                  const errors: string[] = this.authService.extractErrorMessages(
@@ -628,6 +649,12 @@ this.http.post<any>(this.createEmployeeApiUrl, payload, { headers })
     });
     }
   }
+  abrirhistorialPagos(employees:Employee) { 
+    this.idEmpleadoHistorial = employees.userId;
+    this.idEmpleadoPagos = employees.id;
+    this.viewMode = 'historial';
+  }
+
     //manejo modal:
   showAlert(type: AlertType, message: string | string[]): void {
     this.alertType = type;

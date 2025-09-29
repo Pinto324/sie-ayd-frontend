@@ -13,6 +13,12 @@
 
 @if (guideInfo) {
 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
+    <div class="flex justify-end mb-4">
+        <button (click)="downloadGuideDetailsPdf()"
+                class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 transition-colors shadow-md">
+            <fa-icon [icon]="faFilePdf" class="mr-2"></fa-icon> Descargar Detalles (PDF)
+        </button>
+    </div>
     <div class="mb-8">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-6 text-center">Seguimiento del Envío</h3>
 
@@ -73,12 +79,12 @@
             Última actualización: {{ guideInfo.updatedAt |  date:'dd/MM/yyyy - HH:mm' }}
         </p>
     </div>
-
-    <div
+    <div id="guide-details-section">
+    <div 
         class="p-6 space-y-4 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg dark:text-white">
         <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Detalles de la Guía</h3>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div  class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <p><strong>Código de Guía:</strong> {{ guideInfo.code }}</p>
                 <p><strong>Comercio:</strong> {{ guideInfo.commerce.name }}</p>
@@ -98,6 +104,7 @@
             <p><strong>Descripción:</strong> {{ guideInfo.description }}</p>
         </div>
         }
-    </div>
+    </div></div>
+     
 </div>
 }

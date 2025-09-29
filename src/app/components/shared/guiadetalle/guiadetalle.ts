@@ -9,9 +9,12 @@ import {
   faTruckFast,    // En ruta
   faCheck,        // Entregada
   faBan,          // Cancelada
-  faTimes         // Rechazada
+  faTimes,        // Rechazada
+  faFilePdf 
 } from '@fortawesome/free-solid-svg-icons';
-
+import { ExportService } from '../../../services/export.service'; 
+import { Alert } from '../alert/alert';
+import { AlertType } from '../alert/alert-type.type';
 // --- Interfaces (Copied from guia.ts for self-containment) ---
 
 interface Commerce {
@@ -62,11 +65,13 @@ interface Guide {
 })
 export class Guiadetalle implements OnChanges {
   @Input() guideCode: string | null = null;
-
+  isAlertModalOpen: boolean = false;
+  alertType: AlertType = 'info';
+  alertMessage: string | string[] = '';
   guideInfo: Guide | null = null;
   isLoading = false;
   errorMessage: string | null = null;
-
+  faFilePdf = faFilePdf;
   private apiUrl = 'http://147.135.215.156:8090/api/v1/guides/search?code=';
 
   // Iconos y nombres para los estados
@@ -83,6 +88,8 @@ export class Guiadetalle implements OnChanges {
   constructor(
     private http: HttpClient,
     private cdr: ChangeDetectorRef,
+    private exportService: ExportService, // <-- Inyección del servicio de exportación
+    private alertService: Alert 
   ) { }
 
   /**
@@ -102,6 +109,22 @@ export class Guiadetalle implements OnChanges {
         this.cdr.markForCheck();
       }
     }
+  }
+  downloadGuideDetailsPdf(): void {
+    if (!this.guideInfo) {
+      this.showAlert('info', 'No hay información de la guía para exportar.');
+      return;
+    }
+
+    // Solución al problema: ejecuta la lógica de exportación en el siguiente ciclo de la pila
+    setTimeout(() => {
+        const elementId = 'guide-details-section'; 
+        const fileName = `Guia_Detalles_${this.guideInfo!.code}`; // Usamos el ! para asegurar que existe
+
+        // Llama al servicio de exportación
+        this.exportService.exportToPdf(elementId, fileName);
+          this.showAlert('success', 'Descarga de PDF iniciada.');
+    }, 0); 
   }
 
   getGuideInfo(code: string) {
@@ -196,5 +219,15 @@ getStatusTextClass(statusId: number): string {
   } else {
     return `${baseClasses} text-gray-400 dark:text-gray-500`;
   }
-}
+  }
+    showAlert(type: AlertType, message: string | string[]): void {
+    this.alertType = type;
+    this.alertMessage = message;
+    this.isAlertModalOpen = true;
+    this.cdr.markForCheck();
+  }
+  closeAlertModal(): void {
+    this.isAlertModalOpen = false;
+    this.alertMessage = '';
+  }
 }

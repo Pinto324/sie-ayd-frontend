@@ -36,22 +36,54 @@
       <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
           <tr>
+            <th scope="col" class="px-6 py-3">Logo</th>
             <th scope="col" class="px-6 py-3">Nombre del Comercio</th>
             <th scope="col" class="px-6 py-3">NIT</th>
             <th scope="col" class="px-6 py-3">Email</th>
             <th scope="col" class="px-6 py-3">Teléfono</th>
+            <th scope="col" class="px-6 py-3">Documentos</th>
             <th scope="col" class="px-6 py-3">Acciones</th>
           </tr>
         </thead>
         <tbody>
           @for (request of filteredRequests; track request.id) {
             <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+              <!-- Columna del Logo -->
+              <td class="px-6 py-4">
+                @if (request.logo) {
+                  <button 
+                    (click)="viewLogo(request.logo)"
+                    class="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                    title="Ver logo">
+                    <fa-icon [icon]="faImage" class="text-blue-600"></fa-icon>
+                  </button>
+                } @else {
+                  <span class="text-gray-400 text-xs">Sin logo</span>
+                }
+              </td>
+              
               <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
                 {{ request.name }}
               </td>
               <td class="px-6 py-4">{{ request.nit }}</td>
               <td class="px-6 py-4">{{ request.email }}</td>
               <td class="px-6 py-4">{{ request.phoneNumber }}</td>
+              
+              <!-- Columna de Documentos -->
+              <td class="px-6 py-4">
+                @if (request.file) {
+                  <button 
+                    (click)="downloadFile(request.file, 'documentos_' + request.nit + '.pdf')"
+                    class="flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
+                    title="Descargar documentos">
+                    <fa-icon [icon]="faDownload"></fa-icon>
+                    Descargar
+                  </button>
+                } @else {
+                  <span class="text-gray-400 text-xs">Sin documentos</span>
+                }
+              </td>
+              
               <td class="px-6 py-4 flex gap-2">
                 <button 
                   (click)="acceptRequest(request)"
@@ -70,7 +102,7 @@
           }
           @empty {
             <tr>
-              <td colspan="5" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+              <td colspan="7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                 No se encontraron solicitudes nuevas
               </td>
             </tr>

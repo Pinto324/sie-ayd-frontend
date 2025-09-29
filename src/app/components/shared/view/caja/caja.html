@@ -1,0 +1,167 @@
+<app-alert 
+  [isOpen]="isAlertModalOpen"
+  [type]="alertType"
+  [message]="alertMessage"
+  (closed)="closeAlertModal()">
+</app-alert>
+
+<app-modal 
+  [isOpen]="isConfirmModalOpen" 
+  title="Confirmación de Cierre de Caja Mensual" 
+  size="md"
+  (close)="closeConfirmModal()">
+  
+  <div modal-body>
+    <p class="text-gray-600 dark:text-gray-300 mb-4">
+      ¿Está seguro de que desea crear el cierre de caja mensual?
+      Esta acción consolidará los montos actuales.
+    </p>
+    <p class="text-sm font-semibold text-red-500">
+      Asegúrese de que todos los movimientos del mes están reflejados.
+    </p>
+  </div>
+  
+  <div modal-footer class="flex justify-end w-full gap-2">
+    <button 
+        (click)="closeConfirmModal()"
+        type="button"
+        class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600">
+        Cancelar
+    </button>
+    <button 
+        (click)="createCashClosing()"
+        type="button"
+        class="text-white inline-flex items-center bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+        <fa-icon [icon]="faCheck" class="me-2"></fa-icon>
+        Sí, Crear Cierre
+    </button>
+  </div>
+</app-modal>
+
+
+<div class="container mx-auto px-4 py-8">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-black flex items-center gap-3">
+        <fa-icon [icon]="faChartBar" class="text-blue-600"></fa-icon>
+        Gestión de Cierres de Caja
+      </h1>
+      <p class="text-gray-600 dark:text-black-300 mt-2">
+        @if (esComercio) {
+          Historial de cierres de caja mensuales.
+        } @else {
+          Administración general de cierres de caja de comercios.
+        }
+      </p>
+    </div>
+
+    @if (esComercio) {
+      <div class="flex gap-4 mt-4 md:mt-0">
+        <button 
+            (click)="openCreateConfirmationModal()"
+            class="flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 transition-colors font-medium text-sm">
+            <fa-icon [icon]="faPlus"></fa-icon>
+            Crear Cierre de Caja
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (isLoading) {
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden p-6 text-center text-gray-500">
+      Cargando cierres de caja...
+    </div>
+  } @else if (errorMessage) {
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden p-6 text-center text-red-500 border border-red-300">
+      {{ errorMessage }}
+    </div>
+  } @else {
+    
+    @if (viewMode === 'invoice' && selectedClosing) {
+      @if (!esComercio) {
+        <button 
+          (click)="goBackToTable()"
+          class="flex items-center px-3 py-1 mb-4 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors">
+            <fa-icon [icon]="faArrowLeft" class="mr-2"></fa-icon>
+            Volver a la lista
+        </button>
+      }
+
+      <div class="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
+        <h2 class="text-2xl font-bold border-b pb-4 mb-4 text-gray-900 dark:text-white">
+          <fa-icon [icon]="faFileInvoiceDollar" class="mr-2 text-blue-600"></fa-icon>
+          Factura de Cierre de Caja #{{ selectedClosing.id }}
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-8 mb-6 text-sm text-gray-700 dark:text-gray-300">
+          <p><strong>Comercio:</strong> {{ selectedClosing.commerce.name }}</p>
+          <p><strong>Fecha de Cierre:</strong> {{ selectedClosing.createdDate | date: 'mediumDate' }}</p>
+          <p><strong>Nivel de Fidelización:</strong> <span class="font-semibold text-blue-600">{{ selectedClosing.fidelizationLevel }}</span></p>
+          <p><strong>Estado:</strong> <span class="font-semibold text-green-600">{{ selectedClosing.status }}</span></p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="p-4 border border-green-200 bg-green-50 dark:bg-gray-700 rounded-lg">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center mb-3">
+              <fa-icon [icon]="faTruck" class="mr-2 text-green-600"></fa-icon>
+              Entregas (Total: {{ selectedClosing.deliveriesTotalCount }})
+            </h3>
+            <dl class="text-sm space-y-2">
+              <div class="flex justify-between">
+                <dt>Monto Bruto Entregas:</dt>
+                <dd class="font-medium text-gray-900 dark:text-white">${{ selectedClosing.deliveriesTotalAmount | number: '1.2-2' }}</dd>
+              </div>
+              <div class="flex justify-between">
+                <dt>Porcentaje Aplicado:</dt>
+                <dd class="font-medium text-red-600">{{ selectedClosing.deliveriesApplyPercentage }}%</dd>
+              </div>
+              <div class="flex justify-between pt-2 border-t border-green-100 dark:border-gray-600">
+                <dt class="font-bold">Subtotal Entregas:</dt>
+                <dd class="font-bold text-lg text-green-600">${{ selectedClosing.deliveriesSubTotalAmount | number: '1.2-2' }}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="p-4 border border-red-200 bg-red-50 dark:bg-gray-700 rounded-lg">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center mb-3">
+              <fa-icon [icon]="faBan" class="mr-2 text-red-600"></fa-icon>
+              Cancelaciones (Total: {{ selectedClosing.cancelledTotalCount }})
+            </h3>
+            <dl class="text-sm space-y-2">
+              <div class="flex justify-between">
+                <dt>Monto Bruto Cancelaciones:</dt>
+                <dd class="font-medium text-gray-900 dark:text-white">${{ selectedClosing.cancelledTotalAmount | number: '1.2-2' }}</dd>
+              </div>
+              <div class="flex justify-between">
+                <dt>Porcentaje de Cargo Aplicado:</dt>
+                <dd class="font-medium text-red-600">{{ selectedClosing.cancelledApplyPercentage }}%</dd>
+              </div>
+              <div class="flex justify-between pt-2 border-t border-red-100 dark:border-gray-600">
+                <dt class="font-bold">Subtotal Cancelaciones:</dt>
+                <dd class="font-bold text-lg text-red-600">${{ selectedClosing.cancelledSubTotalAmount | number: '1.2-2' }}</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+        
+        <div class="mt-6 p-4 bg-blue-50 dark:bg-gray-900 border-l-4 border-blue-500 rounded-lg flex justify-between items-center">
+          <p class="text-lg font-bold text-gray-900 dark:text-white">Monto Total de Cierre:</p>
+          <span class="text-3xl font-extrabold text-blue-600">${{ selectedClosing.totalAmount | number: '1.2-2' }}</span>
+        </div>
+      </div>
+    
+    } @else if (viewMode === 'table' && closings.length > 0) {
+      <app-table 
+        [data]="closings" 
+        [columns]="tableColumns" 
+        [actions]="tableActions"
+        (actionClick)="handleTableAction($event)">
+      </app-table>
+
+    } @else {
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden p-6 text-center text-gray-500">
+        No se encontraron cierres de caja.
+      </div>
+    }
+  }
+</div>

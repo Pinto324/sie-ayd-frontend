@@ -84,35 +84,21 @@ export class GuiasCliente implements OnInit {
     { key: 'status', header: 'Estado', type: 'nested', nestedKey: 'name' },
     { key: 'createdAt', header: 'Fecha Creada', type: 'date' },
   ];
-private initializeTableActions() {
-    // 1. Definir acciones base
-    this.tableActions = [
-      {
-        label: 'Ver Detalle',
-        icon: faEye,
-        action: 'view_detail',
-        class: 'px-3 py-1 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors'
-      }
-    ];
-
-    // 2. Condición de Rol: Solo si el usuario es el Cliente (ID 5)
-    if (this.userRoleId === 5) {
-      this.tableActions.push({
-        label: 'Rechazar Entrega',
-        icon: faTimesCircle,
-        action: 'reject_delivery',
-        class: 'px-3 py-1 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors', 
-      });
-    }
-}
   tableActions: TableAction[] = [
-    {
-      label: 'Ver Detalle',
-      icon: faEye,
-      action: 'view_detail',
-      class: 'px-3 py-1 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors'
-    },
-  ];
+  {
+    label: 'Ver Detalle',
+    icon: faEye,
+    action: 'view_detail',
+    class: 'px-3 py-1 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors'
+  },
+  {
+    label: 'Rechazar Entrega',
+    icon: faTimesCircle,
+    action: 'reject_delivery',
+    class: 'px-3 py-1 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors',
+    condition: () => this.userRoleId === 5   // 👈 se evalúa por fila
+  }
+];
   // ----------------------------------------
 
   constructor(
@@ -138,7 +124,6 @@ private initializeTableActions() {
       default:
         break;
     }
-    this.initializeTableActions(); 
     this.loadGuides();
   }
 

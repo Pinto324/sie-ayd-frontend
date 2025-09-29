@@ -86,7 +86,7 @@ export class IncidenciaCoordinador implements OnInit {
     { key: 'reportedBy', header: 'Reportado Por', type: 'nested', nestedKey: 'firstname' },
     { key: 'reportedBy', header: 'Apellido', type: 'nested', nestedKey: 'lastname' },
     { key: 'notes', header: 'Descripción', type: 'text' },
-    { key: 'reportedAt', header: 'Fecha Reporte', type: 'date', pipeFormat: 'short' }
+    { key: 'reportedAt', header: 'Fecha Reporte', type: 'date', pipeFormat: 'dd/MM/yyyy - HH:mm' }
   ];
 
   tableActions: TableAction[] = [

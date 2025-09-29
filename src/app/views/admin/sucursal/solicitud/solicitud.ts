@@ -4,7 +4,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faCheckCircle, faTimesCircle, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faCheckCircle, faTimesCircle, faSearch, faDownload, faImage } from '@fortawesome/free-solid-svg-icons';
+
 interface CommerceRequest {
   id: number;
   nit: string;
@@ -14,7 +15,10 @@ interface CommerceRequest {
   createdAt: string;
   member: string;
   address: string;
+  logo: string;       // Nuevo campo
+  file: string;       // Nuevo campo
 }
+
 interface ApiResponse {
   content: CommerceRequest[];
   page: number;
@@ -22,6 +26,7 @@ interface ApiResponse {
   totalElements: number;
   totalPages: number;
 }
+
 @Component({
   selector: 'app-solicitud',
   standalone: true,
@@ -36,9 +41,12 @@ export class Solicitud implements OnInit {
   faCheckCircle = faCheckCircle;
   faTimesCircle = faTimesCircle;
   faSearch = faSearch;
+  faDownload = faDownload;      // Nuevo ícono
+  faImage = faImage;            // Nuevo ícono
   aceptada = false;
   rechazada = false;
-  private apiUrl = 'http://147.135.215.156:8090/api/v1/commerce/request?page=0&size=10';
+  
+  private apiUrl = 'http://147.135.215.156:8090/api/v1/commerce/request?page=0&size=1000';
   private acceptUrl = 'http://147.135.215.156:8090/api/v1/commerce';
 
   constructor(
@@ -63,6 +71,7 @@ export class Solicitud implements OnInit {
     const headers = this.getHeaders();
     this.http.get<ApiResponse>(this.apiUrl, { headers }).subscribe({
       next: (response) => {
+        console.log(response);
         this.requests = response.content;
         this.filteredRequests = response.content;
         this.cdr.markForCheck();
@@ -88,6 +97,36 @@ export class Solicitud implements OnInit {
     );
   }
 
+  // Función para descargar documentos
+  downloadFile(fileUrl: string, fileName: string) {
+    if (!fileUrl) {
+      console.error('No hay archivo disponible para descargar');
+      return;
+    }
+
+    // Crear un enlace temporal para la descarga
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = fileName || 'documento.pdf';
+    link.target = '_blank';
+    
+    // Simular clic en el enlace
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  // Función para ver logo
+  viewLogo(logoUrl: string) {
+    if (!logoUrl) {
+      console.error('No hay logo disponible');
+      return;
+    }
+    
+    // Abrir el logo en una nueva pestaña
+    window.open(logoUrl, '_blank');
+  }
+
   acceptRequest(request: CommerceRequest) {
     if (confirm(`¿Estás seguro de que quieres aceptar a ${request.name}?`)) {
       const headers = this.getHeaders();
@@ -107,10 +146,8 @@ export class Solicitud implements OnInit {
     }
   }
 
-  // Se podría agregar una función similar para rechazar, si es necesario
   rejectRequest(request: CommerceRequest) {
     if (confirm(`¿Estás seguro de que quieres rechazar a ${request.name}?`)) {
-      // Lógica para rechazar
       const headers = this.getHeaders();
       const payload = { isMember: false };
 

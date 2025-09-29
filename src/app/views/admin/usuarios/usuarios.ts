@@ -101,7 +101,6 @@ export class Usuarios implements OnInit {
         // Access the 'content' property from the response object
         this.users = response.content;
         this.filteredUsers = response.content;
-        console.log('Users loaded successfully:', this.users);
         this.cdr.markForCheck(); 
       },
       error: (error) => {

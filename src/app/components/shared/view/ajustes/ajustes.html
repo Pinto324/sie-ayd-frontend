@@ -1,0 +1,90 @@
+<app-alert 
+  [isOpen]="isAlertModalOpen"
+  [type]="alertType"
+  [message]="alertMessage"
+  (closed)="closeAlertModal()">
+</app-alert>
+<div class="container mx-auto py-4 my-5  dark:bg-gray-800 rounded-lg shadow-xl border border-gray-100 dark:border-gray-700">
+  <h1 class="text-3xl font-bold text-gray-900 dark:text-white px-4 mb-6">Ajustes de Cuenta</h1>
+  <p class="text-gray-600 dark:text-gray-400 mx-4 mb-4">Administra tu información personal y configuración de seguridad.</p>
+
+  @if (isLoading) {
+    <div class="text-center py-10 text-gray-500 dark:text-gray-400">Cargando perfil...</div>
+  } @else if (userProfile) {
+    <form (ngSubmit)="saveProfile()" class="max-w-3xl mx-auto space-y-8">
+      
+      <div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-xl border border-gray-100 dark:border-gray-700">
+        <div class="flex items-center mb-6 border-b border-gray-200 dark:border-gray-600 pb-4">
+          <fa-icon [icon]="faUser" class="text-blue-600 dark:text-blue-400 w-5 h-5 mr-3"></fa-icon>
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Datos Personales</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <div>
+            <label for="firstname" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</label>
+            <input type="text" id="firstname" [(ngModel)]="formModel.firstname" name="firstname" required
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          
+          <div>
+            <label for="lastname" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Apellido</label>
+            <input type="text" id="lastname" [(ngModel)]="formModel.lastname" name="lastname" required
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+            <input type="email" id="email" [ngModel]="formModel.email" name="email" disabled
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-100 dark:bg-gray-600 dark:border-gray-500 dark:text-gray-300">
+          </div>
+          
+          <div>
+            <label for="phoneNumber" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono</label>
+            <input type="tel" id="phoneNumber" [(ngModel)]="formModel.phoneNumber" name="phoneNumber" required
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+          </div>
+
+        </div>
+      </div>
+      
+      <div class="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-xl border border-gray-100 dark:border-gray-700">
+        <div class="flex items-center mb-6 border-b border-gray-200 dark:border-gray-600 pb-4">
+          <fa-icon [icon]="faShield" class="text-red-600 dark:text-red-400 w-5 h-5 mr-3"></fa-icon>
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Seguridad</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <label for="currentPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nueva Contraseña</label>
+            <input type="password" id="currentPassword" [(ngModel)]="formModel.currentPassword" name="currentPassword"
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          
+          <div>
+            <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirmar Contraseña</label>
+            <input type="password" id="confirmPassword" [(ngModel)]="formModel.confirmPassword" name="confirmPassword"
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500">
+          </div>
+        </div>
+
+        <div class="flex items-center">
+          <input id="use2fa" type="checkbox" [(ngModel)]="formModel.use2fa" name="use2fa"
+                 class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+          <label for="use2fa" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Habilitar Autenticación de Dos Factores (2FA)</label>
+        </div>
+      </div>
+      
+      <div class="flex justify-end pt-4">
+        <button type="submit" [disabled]="isSaving"
+                class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors">
+          <fa-icon [icon]="faSave" class="w-5 h-5 mr-2"></fa-icon>
+          {{ isSaving ? 'Guardando...' : 'Guardar Cambios' }}
+        </button>
+      </div>
+
+    </form>
+  } @else {
+    <div class="text-center py-10 text-red-500">No se pudo cargar la información del usuario.</div>
+  }
+</div>

@@ -1,0 +1,28 @@
+<div class="space-y-6">
+  
+    <div class="flex justify-end gap-3 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg shadow-inner">
+      <button (click)="exportToExcel()" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 transition-colors shadow-md">
+        <fa-icon [icon]="faFileExport" class="mr-2"></fa-icon> Exportar Excel
+      </button>
+      <button (click)="exportToPdf()" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-red-600 hover:bg-red-700 transition-colors shadow-md">
+        <fa-icon [icon]="faFileExport" class="mr-2"></fa-icon> Exportar PDF
+      </button>
+      <button (click)="exportToImage()" class="flex items-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-yellow-600 hover:bg-yellow-700 transition-colors shadow-md">
+        <fa-icon [icon]="faFileExport" class="mr-2"></fa-icon> Exportar Imagen
+      </button>
+    </div>
+    
+    @if (isLoading) {
+      <div class="text-center py-10 text-gray-500 dark:text-gray-400">Cargando datos del reporte de entregas...</div>
+    } @else if (reports.length === 0) {
+      <div class="text-center py-10 text-gray-500 dark:text-gray-400 border border-dashed p-4 rounded-lg">
+        No se encontraron reportes de entrega.
+      </div>
+    } @else {
+      <div id="report-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (report of reports; track report.id) {
+          <app-report-card [reportItem]="report"></app-report-card>
+        }
+      </div>
+    }
+</div>

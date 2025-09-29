@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../services/auth';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faUsers, faBuilding, faHammer,faMoneyCheck, faUserTie, faChartBar, faCog, faFileAlt, faPercent, faDumpster, faIdCardClip, faBoxesStacked } from '@fortawesome/free-solid-svg-icons';
+import { faUsers, faBuilding,faMoneyBill, faHammer,faMoneyCheck, faUserTie, faChartBar, faCog, faFileAlt, faPercent, faDumpster, faIdCardClip, faBoxesStacked } from '@fortawesome/free-solid-svg-icons';
 interface ModuleCard {
   id: number;
   title: string;
@@ -25,12 +25,13 @@ export class Dashboard implements OnInit {
   filteredModules: ModuleCard[] = [];
   guidemodule= "un modulo";
   guidename= "Paquetes";
+  
   constructor(
     private authService: AuthService,
     private library: FaIconLibrary
   ) {
     // Agregar iconos a la librería
-    library.addIcons(faUsers, faHammer,faPercent, faMoneyCheck, faBuilding, faUserTie, faChartBar, faCog, faFileAlt, faDumpster, faIdCardClip, faBoxesStacked);
+    library.addIcons(faUsers, faMoneyBill,faHammer,faPercent, faMoneyCheck, faBuilding, faUserTie, faChartBar, faCog, faFileAlt, faDumpster, faIdCardClip, faBoxesStacked);
   }
 
   ngOnInit() {
@@ -108,15 +109,7 @@ export class Dashboard implements OnInit {
         title: 'Módulo de Reportes',
         description: 'Genera reportes y estadísticas del sistema.',
         icon: 'id-card-clip',
-        route: '/reports',
-        roleAccess: [1, 2]
-      },
-      {
-        id: 7,
-        title: 'Módulo de Configuración',
-        description: 'Configuración general del sistema y preferencias.',
-        icon: 'gear',
-        route: '/settings',
+        route: '/ModuloReportes',
         roleAccess: [1]
       },
       {
@@ -134,6 +127,13 @@ export class Dashboard implements OnInit {
         route: '/fidelizacioncomercio',
         roleAccess: [2]
       },{
+        id: 3,
+        title: 'cierres de caja',
+        description: 'Informacion de tus cierres de caja.',
+        icon: 'id-card-clip',
+        route: '/cajacomercios',
+        roleAccess: [2]
+      },{
         id: 1,
         title: 'Solicitud de paquetes',
         description: 'Revisa y controla todos las solicitudes de paquetes que tienes asignadas!.',
@@ -146,6 +146,13 @@ export class Dashboard implements OnInit {
         description: 'Maneja tu progreso con las entregas que tienes asignadas!',
         icon: 'boxes-stacked',
         route: '/entregasrepartidor',
+        roleAccess: [3]
+      },{
+        id: 3,
+        title: 'Historial de pagos',
+        description: 'Mira todos los pagos que te han realizado!',
+        icon: 'money-bill',
+        route: '/pagosrepartidor',
         roleAccess: [3]
       },{
         id: 1,
@@ -176,6 +183,13 @@ export class Dashboard implements OnInit {
         icon: 'dumpster',
         route: '/afilacion',
         roleAccess: [5]
+      },{
+        id: 7,
+        title: 'Módulo de Configuración',
+        description: 'Configuración general de los datos de tu usuario.',
+        icon: 'gear',
+        route: '/Ajustes',
+        roleAccess: [1, 2, 3,4,5]
       }
     ];
   }

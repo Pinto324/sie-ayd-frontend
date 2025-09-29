@@ -7,7 +7,7 @@ import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 export interface TableColumn {
   key: string;            // La propiedad del objeto de datos (ej: 'code', 'recipient', 'status.name')
   header: string;         // El texto a mostrar en el encabezado
-  type?: 'text' | 'date' | 'currency' | 'iconStatus' | 'nested'; // Tipo de formato/renderizado
+  type?: 'text' | 'date' | 'currency' | 'iconStatus' | 'nested'| 'custom'; // Tipo de formato/renderizado
   nestedKey?: string;     // Para type: 'nested', la sub-propiedad (ej: 'name' para 'status.name')
   pipeFormat?: string;    // Formato para date o currency (ej: 'shortDate', '1.2-2')
 }
@@ -37,11 +37,20 @@ export class Table {
   @Output() actionClick = new EventEmitter<{ action: string, item: any }>();
 
   // Función para obtener el valor de la celda, manejando propiedades anidadas
-  getCellValue(item: any, column: TableColumn): any {
-    if (column.type === 'nested' && column.nestedKey) {
-      return item[column.key]?.[column.nestedKey];
+ getCellValue(item: any, column: TableColumn): any {
+    // Implementación robusta para manejar la notación de puntos (ej: 'commerce.logo')
+    // Esto hace que el tipo 'nested' sea redundante, pero funciona para todos los casos.
+    const keys = column.key.split('.');
+    let value = item;
+
+    for (const key of keys) {
+      if (value && typeof value === 'object' && key in value) {
+        value = value[key];
+      } else {
+        return undefined; 
+      }
     }
-    return item[column.key];
+    return value;
   }
 
   // Lógica para manejar el clic en los botones de acción

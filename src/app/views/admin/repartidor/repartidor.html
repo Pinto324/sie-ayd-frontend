@@ -105,6 +105,11 @@
                 Realizando acción...
             </div>
         }
+    } @else if (viewMode === 'historial'){
+        <app-historialpagos  [userId]="idEmpleadoHistorial" [idEmpleado]="idEmpleadoPagos" [isAdminUserSpecific]="true" (back)="goBackToTable()"
+            
+            >
+            </app-historialpagos>
     }
     @if (viewMode === 'contracts' && selectedDeliveryPersonDetail) {
 
@@ -138,7 +143,144 @@
 
 <app-modal [isOpen]="isModalOpen" [title]="isEditMode ? 'Modificar Empleado' : 'Crear Nuevo Empleado'" size="lg"
     (close)="closeModal()">
-    </app-modal>
+
+    <div modal-body>
+        <form [formGroup]="employeeForm" class="space-y-6">
+            <!-- Datos Personales -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="firstname" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nombre *</label>
+                    <input type="text" formControlName="firstname" id="firstname"
+                        class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                    @if (employeeForm.get('firstname')?.invalid && employeeForm.get('firstname')?.touched) {
+                    <p class="mt-1 text-sm text-red-600">El nombre es requerido</p>
+                    }
+                </div>
+
+                <div>
+                    <label for="lastname" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Apellido *</label>
+                    <input type="text" formControlName="lastname" id="lastname"
+                        class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                    @if (employeeForm.get('lastname')?.invalid && employeeForm.get('lastname')?.touched) {
+                    <p class="mt-1 text-sm text-red-600">El apellido es requerido</p>
+                    }
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="dni" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">DNI *</label>
+                    <input type="number" formControlName="dni" id="dni"
+                        class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                    @if (employeeForm.get('dni')?.invalid && employeeForm.get('dni')?.touched) {
+                    <p class="mt-1 text-sm text-red-600">El DNI es requerido</p>
+                    }
+                </div>
+
+                <div>
+                    <label for="phoneNumber" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Teléfono *</label>
+                    <input type="text" formControlName="phoneNumber" id="phoneNumber"
+                        class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                    @if (employeeForm.get('phoneNumber')?.invalid && employeeForm.get('phoneNumber')?.touched) {
+                    <p class="mt-1 text-sm text-red-600">El teléfono es requerido</p>
+                    }
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="birthDate" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Fecha de Nacimiento</label>
+                    <input type="date" formControlName="birthDate" id="birthDate"
+                        class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                </div>
+
+                <div>
+                    <label for="emergencyContact" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Contacto de Emergencia</label>
+                    <input type="text" formControlName="emergencyContact" id="emergencyContact"
+                        class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white">
+                </div>
+            </div>
+
+            <div>
+                <label for="address" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Dirección</label>
+                <textarea formControlName="address" id="address" rows="3"
+                    class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"></textarea>
+            </div>
+
+            <!-- Solo mostrar campos de contrato en modo CREACIÓN -->
+            @if (!isEditMode) {
+            <div class="border-t pt-4 border-gray-300 dark:border-gray-600">
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Detalles del Contrato</h4>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="contractTypeId" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tipo de Contrato *</label>
+                        <select formControlName="contractTypeId" id="contractTypeId"
+                            class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                            required>
+                            <option [ngValue]="null" disabled>Seleccione un tipo</option>
+                            @for (type of contractTypes; track type.id) {
+                            <option [ngValue]="type.id">{{ type.name }}</option>
+                            }
+                        </select>
+                        @if (employeeForm.get('contractTypeId')?.invalid && employeeForm.get('contractTypeId')?.touched) {
+                        <p class="mt-1 text-sm text-red-600">El tipo de contrato es requerido</p>
+                        }
+                    </div>
+
+                    <div>
+                        <label for="baseSalary" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Salario Base *</label>
+                        <input type="number" formControlName="baseSalary" id="baseSalary" min="0"
+                            class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                            required>
+                        @if (employeeForm.get('baseSalary')?.invalid && employeeForm.get('baseSalary')?.touched) {
+                        <p class="mt-1 text-sm text-red-600">El salario base es requerido</p>
+                        }
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="commissionPercentage" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Porcentaje de Comisión *</label>
+                        <input type="number" formControlName="commissionPercentage" id="commissionPercentage" min="0" max="100"
+                            class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                            required>
+                        @if (employeeForm.get('commissionPercentage')?.invalid && employeeForm.get('commissionPercentage')?.touched) {
+                        <p class="mt-1 text-sm text-red-600">La comisión es requerida (0-100%)</p>
+                        }
+                    </div>
+
+                    <div>
+                        <label for="endDate" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Fecha de Fin *</label>
+                        <input type="date" formControlName="endDate" id="endDate"
+                            class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                            required>
+                        @if (employeeForm.get('endDate')?.invalid && employeeForm.get('endDate')?.touched) {
+                        <p class="mt-1 text-sm text-red-600">La fecha de fin es requerida</p>
+                        }
+                    </div>
+                </div>
+            </div>
+            }
+        </form>
+    </div>
+
+    <div modal-footer class="flex justify-end w-full gap-2">
+        <button (click)="closeModal()" type="button"
+            class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600">
+            Cancelar
+        </button>
+        <button (click)="onSubmit()" [disabled]="(!isEditMode && employeeForm.invalid) || isLoadingModal"
+            class="text-white inline-flex items-center bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center disabled:opacity-50 disabled:cursor-not-allowed">
+            @if (isLoadingModal) {
+            Cargando...
+            } @else {
+            {{ isEditMode ? 'Modificar Empleado' : 'Crear Empleado' }}
+            }
+        </button>
+    </div>
+
+</app-modal>
 
 <app-modal [isOpen]="isContractModalOpen" 
            [title]="contractModalMode === 'nuevo' ? 'Crear Nuevo Contrato' : 'Renovar Contrato Existente'" 

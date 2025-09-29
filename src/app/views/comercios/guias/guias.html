@@ -1,3 +1,23 @@
+<app-alert 
+  [isOpen]="isAlertModalOpen"
+  [type]="alertType"
+  [message]="alertMessage"
+  (closed)="closeAlertModal()">
+</app-alert>
+@if(showDetailView){
+<div class="container mx-auto px-4 py-8">
+
+    <button (click)="goBackToTable()"
+        class="flex items-center gap-2 mb-6 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:hover:bg-gray-600 transition-colors">
+        <fa-icon [icon]="faArrowLeft"></fa-icon>
+        Volver a la Lista
+    </button>
+
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-black mb-6">Seguimiento de Guía</h1>
+
+    <app-guiadetalle [guideCode]="selectedGuideCode"></app-guiadetalle>
+</div>
+}@else {
 <div class="container mx-auto px-4 py-8">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <div>
@@ -121,3 +141,4 @@
 </app-modal>
     }
 </div>
+}

@@ -30,7 +30,7 @@ interface Assignment {
 }
 @Component({
   selector: 'app-asignacion',
-  imports: [CommonModule, FormsModule, FontAwesomeModule,Alert, DatePipe, DecimalPipe],
+  imports: [CommonModule, FormsModule, FontAwesomeModule,Alert, DecimalPipe],
   templateUrl: './asignacion.html',
   styleUrl: './asignacion.css'
 })
