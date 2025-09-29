@@ -1,24 +1,45 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { InputComponent } from '../../../shared/input/input';
 import { ButtonComponent } from '../../../shared/button/button';
-import { FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormControl, FormsModule } from '@angular/forms';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-changepass',
-  imports: [InputComponent, ButtonComponent],
+  imports: [InputComponent, ButtonComponent, FormsModule],
   templateUrl: './changepass.html',
   styleUrl: './changepass.css'
 })
-export class Changepass {
+export class Changepass implements OnInit {
   resetForm: FormGroup;
   isLoading = false;
-  constructor(private fb: FormBuilder) {
+  errorMessage: string | null = null;
+  successMessage: string | null = null;
+  email: string | null = null;
+  private apiUrl = 'http://147.135.215.156:8090/api/v1/auth/change-password';
+
+  constructor(
+    private fb: FormBuilder,
+    private http: HttpClient,
+    private router: Router,
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
+  ) {
     this.resetForm = this.fb.group({
       verificationCode: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(6)]],
       newPassword: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]]
     }, { validator: this.passwordMatchValidator });
   }
+
+  ngOnInit() {
+    // Get email from query parameters
+    this.route.queryParams.subscribe(params => {
+      this.email = params['email'] || null;
+    });
+  }
+
   // Getter para el control del código de verificación
   get verificationCodeControl(): FormControl {
     return this.resetForm.get('verificationCode') as FormControl;
@@ -86,15 +107,43 @@ export class Changepass {
   }
 
   onSubmit() {
+    this.errorMessage = null;
+    this.successMessage = null;
+
+    // Validate that email exists
+    if (!this.email) {
+      this.errorMessage = 'No se encontró el email. Por favor, inicie el proceso de recuperación nuevamente.';
+      this.cdr.detectChanges();
+      return;
+    }
+
     if (this.resetForm.valid) {
       this.isLoading = true;
-      console.log('Datos del formulario:', this.resetForm.value);
+      this.cdr.detectChanges();
 
-      // Aquí iría la lógica para enviar los datos al servidor
-      setTimeout(() => {
-        this.isLoading = false;
-        // Redirigir o mostrar mensaje de éxito
-      }, 1000);
+      const requestBody = {
+        code: this.resetForm.value.verificationCode,
+        email: this.email,
+        newPassword: this.resetForm.value.newPassword
+      };
+
+      this.http.post(this.apiUrl, requestBody).subscribe({
+        next: (response: any) => {
+          this.isLoading = false;
+          this.successMessage = 'Contraseña cambiada exitosamente';
+          this.resetForm.disable();
+          this.cdr.detectChanges();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.isLoading = false;
+          if (error.error && error.error.message) {
+            this.errorMessage = error.error.message;
+          } else {
+            this.errorMessage = 'Ocurrió un error al cambiar la contraseña. Inténtelo nuevamente.';
+          }
+          this.cdr.detectChanges();
+        }
+      });
     }
   }
 }
