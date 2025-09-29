@@ -1,1 +1,30 @@
-<p>fidelizacion works!</p>
+<app-alert 
+  [isOpen]="isAlertModalOpen"
+  [type]="alertType"
+  [message]="alertMessage"
+  (closed)="closeAlertModal()">
+</app-alert>
+
+<div class="container mx-auto px-4 py-8">
+  <div class="flex items-center mb-6">
+  </div>
+
+  @if (isLoading) {
+    <div class="text-center p-10 text-gray-500 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+      Cargando datos de usuario y comercio...
+    </div>
+  } @else if (errorMessage) {
+    <div class="text-center p-10 text-red-500 border border-red-300 bg-red-50 rounded-lg">
+      <p class="font-semibold">{{ errorMessage }}</p>
+    </div>
+  } @else if (commerceId && commerceName) {
+    <app-fidelizacioncomercio
+      [commerceId]="commerceId"
+      [name]="commerceName">
+    </app-fidelizacioncomercio>
+  } @else {
+    <div class="text-center p-10 text-gray-500 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+        No se pudo cargar la información del comercio.
+    </div>
+  }
+</div>

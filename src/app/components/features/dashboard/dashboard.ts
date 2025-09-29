@@ -131,7 +131,7 @@ export class Dashboard implements OnInit {
         title: 'Informacion de fidelización',
         description: 'Mira un reporte de tu rendimiento.',
         icon: 'id-card-clip',
-        route: '/fidelizacioncomercios',
+        route: '/fidelizacioncomercio',
         roleAccess: [2]
       },{
         id: 1,
