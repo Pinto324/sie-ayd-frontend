@@ -18,6 +18,14 @@
         }
         <form class="space-y-4 md:space-y-6" [formGroup]="commerceRegisterForm" (ngSubmit)="onSubmit()">
           <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Logo del Comercio (imagen)</label>
+            <input #logoInput type="file" accept="image/*" (change)="onLogoChange($event)" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" />
+          </div>
+          <div>
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Archivo de validación (PDF)</label>
+            <input #pdfInput type="file" accept="application/pdf" (change)="onPdfChange($event)" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" />
+          </div>
+          <div>
             <app-input label="Nombre del Comercio" type="text" [control]="nameControl" placeholder="Nombre de tu comercio" [error]="getNameError()"></app-input>
           </div>
           <div>
