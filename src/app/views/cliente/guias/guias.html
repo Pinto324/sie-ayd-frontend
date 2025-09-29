@@ -1,9 +1,15 @@
+<app-alert 
+  [isOpen]="isAlertModalOpen"
+  [type]="alertType"
+  [message]="alertMessage"
+  (closed)="closeAlertModal()">
+</app-alert>
 @if (!showDetailView) {
 <div class="container mx-auto px-4 py-8">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
         <div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-black">Mis Guías de Envío</h1>
-            <p class="text-gray-600 dark:text-gray-300 mt-2">Consulta el estado y los detalles de tus envíos.</p>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-black">{{guidename}}</h1>
+            <p class="text-gray-600 dark:text-gray-300 mt-2">{{guideinfo}}.</p>
         </div>
 
         <div class="flex gap-4 mt-4 md:mt-0">
@@ -30,4 +36,59 @@
 
     <app-guiadetalle [guideCode]="selectedGuideCode"></app-guiadetalle>
 </div>
+}
+@if (isRejectModalOpen) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="relative p-4 w-full max-w-md max-h-full" (click)="$event.stopPropagation()">
+      <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+        
+        <button type="button" 
+                (click)="closeRejectModal()"
+                class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" 
+                title="Cerrar">
+            <fa-icon [icon]="faTimes" class="w-3 h-3"></fa-icon>
+            <span class="sr-only">Cerrar modal</span>
+        </button>
+        
+        <div class="p-4 md:p-5 text-center">
+            
+            <fa-icon [icon]="faReject" class="mx-auto mb-4 w-12 h-12 text-red-500 dark:text-red-400"></fa-icon>
+            
+            <h3 class="mb-5 text-lg font-bold text-gray-900 dark:text-white">Rechazar Entrega de Guía #{{ rejectionGuideId }}</h3>
+            <p class="mb-5 text-sm font-normal text-gray-500 dark:text-gray-400">
+              ¿Estás seguro de que quieres rechazar la entrega de esta guía? Proporciona una razón detallada para el rechazo.
+            </p>
+
+            <div class="mb-6 text-left">
+                <label for="rejection-notes" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Razón del Rechazo <span class="text-red-500">*</span></label>
+                <textarea 
+                  [(ngModel)]="rejectionNotes" 
+                  id="rejection-notes"
+                  rows="4"
+                  placeholder="Describe la razón para rechazar la entrega..."
+                  class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white focus:ring-red-500 focus:border-red-500"
+                  required
+                ></textarea>
+            </div>
+            
+            <div class="flex justify-center gap-4">
+              <button 
+                  type="button" 
+                  (click)="rejectDelivery()"
+                  [disabled]="!rejectionNotes || rejectionNotes.trim() === ''"
+                  class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center disabled:opacity-50">
+                  Confirmar Rechazo
+              </button>
+              
+              <button 
+                  type="button" 
+                  (click)="closeRejectModal()"
+                  class="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                  Cancelar
+              </button>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
 }

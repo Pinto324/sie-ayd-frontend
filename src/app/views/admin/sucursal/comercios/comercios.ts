@@ -4,7 +4,8 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../../services/auth';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faEdit, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faSearch, faChartLine, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { Fidelizacioncomercio } from '../../../../components/shared/view/fidelizacioncomercio/fidelizacioncomercio';
 
 // Interface para la estructura de un comercio aceptado
 interface Commerce {
@@ -30,7 +31,7 @@ interface ApiResponse {
 @Component({
   selector: 'app-comercios',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, FontAwesomeModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, FontAwesomeModule,Fidelizacioncomercio],
   templateUrl: './comercios.html',
   styleUrl: './comercios.css'
 })
@@ -42,7 +43,14 @@ export class Comercios implements OnInit {
   selectedCommerce: Commerce | null = null;
   faEdit = faEdit;
   faSearch = faSearch;
+  faChartLine = faChartLine;
+  faArrowLeft = faArrowLeft;
   commerceForm: FormGroup;
+
+  viewMode: 'table' | 'report' = 'table'; // Define el estado de la vista
+  selectedCommerceId: number | null = null; 
+  nameCommerceId: string | null = null; 
+
 
   private apiUrl = 'http://147.135.215.156:8090/api/v1/commerce?page=0&size=10000';
   private updateUrl = 'http://147.135.215.156:8090/api/v1/commerce';
@@ -117,6 +125,25 @@ export class Comercios implements OnInit {
       isActive: commerce.isActive
     });
     this.isModalOpen = true;
+  }
+  /**
+   * Abre la vista del reporte de fidelización para el comercio seleccionado.
+   * @param commerce El objeto Commerce.
+   */
+  openFidelizationReport(commerce: Commerce) {
+    this.selectedCommerceId = commerce.id;
+    this.nameCommerceId = commerce.name;
+    this.viewMode = 'report';
+  }
+
+  /**
+   * Regresa a la vista principal de la tabla de comercios y recarga los datos.
+   */
+  goBackToTable() {
+    this.selectedCommerceId = null;
+    this.nameCommerceId = null;
+    this.viewMode = 'table';
+    this.loadCommerces(); // Recarga para asegurar que cualquier cambio se refleje
   }
 
   closeModal() {

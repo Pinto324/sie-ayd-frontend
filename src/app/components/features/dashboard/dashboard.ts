@@ -23,7 +23,8 @@ export class Dashboard implements OnInit {
   modules: ModuleCard[] = [];
   userRoleId: number | null = null;
   filteredModules: ModuleCard[] = [];
-
+  guidemodule= "un modulo";
+  guidename= "Paquetes";
   constructor(
     private authService: AuthService,
     private library: FaIconLibrary
@@ -34,12 +35,34 @@ export class Dashboard implements OnInit {
 
   ngOnInit() {
     this.userRoleId = this.authService.getRoleId();
+    
+    switch (this.userRoleId) { 
+      case 1:
+      case 4:
+        this.guidemodule = "Modulo para ver la información y el estado de los paquetes"
+        this.guidename = "Módulo de paquetes"
+        break;
+      case 5:
+        this.guidemodule = "Todas la información y configuraciones del estado de tu paquete!."
+        this.guidename = "Paquetes"
+        break;
+      default:
+        break;
+    }
     this.initializeModules();
     this.filterModulesByRole();
   }
 
   private initializeModules(): void {
     this.modules = [
+    {
+        id: 1,
+        title: this.guidename,
+        description: this.guidemodule,
+        icon: 'boxes-stacked',
+        route: '/guiascliente',
+        roleAccess: [1,4,5]
+      },
       {
         id: 1,
         title: 'Módulo de Usuarios',
@@ -104,6 +127,13 @@ export class Dashboard implements OnInit {
         route: '/guias',
         roleAccess: [2]
       },{
+        id: 2,
+        title: 'Informacion de fidelización',
+        description: 'Mira un reporte de tu rendimiento.',
+        icon: 'id-card-clip',
+        route: '/fidelizacioncomercios',
+        roleAccess: [2]
+      },{
         id: 1,
         title: 'Solicitud de paquetes',
         description: 'Revisa y controla todos las solicitudes de paquetes que tienes asignadas!.',
@@ -124,14 +154,6 @@ export class Dashboard implements OnInit {
         icon: 'dumpster',
         route: '/asignacioncoordinador',
         roleAccess: [4]
-      },
-      {
-        id: 1,
-        title: 'Paquetes',
-        description: 'Todas la información y configuraciones del estado de tu paquete!.',
-        icon: 'boxes-stacked',
-        route: '/guiascliente',
-        roleAccess: [5]
       },
       {
         id: 2,

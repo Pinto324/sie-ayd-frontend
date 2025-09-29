@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, Injectable  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
@@ -9,8 +9,13 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { IconDefinition } from '@fortawesome/fontawesome-common-types';
 import { AlertType } from './alert-type.type';
+@Injectable({
+  // ESTO ES LO CRUCIAL: Lo registra globalmente
+  providedIn: 'root' 
+})
 @Component({
   selector: 'app-alert',
+  standalone: true,
   imports: [CommonModule, FontAwesomeModule],
   templateUrl: './alert.html',
   styleUrl: './alert.css'

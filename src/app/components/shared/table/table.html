@@ -27,7 +27,7 @@
                         ${{ getCellValue(item, column) | number: (column.pipeFormat || '1.2-2') }}
                         }
                         @case ('date') {
-                        {{ getCellValue(item, column) | date: (column.pipeFormat || 'short') }}
+                        {{ getCellValue(item, column) | date: (column.pipeFormat || 'dd/MM/yyyy - HH:mm') }}
                         }
                         @case ('iconStatus') {
                         <div class="flex items-center gap-2">

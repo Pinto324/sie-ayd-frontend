@@ -1,0 +1,111 @@
+<div class="container mx-auto px-4 py-8 mb-8 w-full bg-white rounded-lg shadow dark:border dark:bg-gray-800 dark:border-gray-700">
+  <div class="flex items-center justify-between mb-8 p-8 border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+        Reporte de Fidelización de Comercio
+      </h1>
+      <p class="text-gray-400 dark:text-black-200 mt-2">
+        Análisis de entregas y nivel de fidelización (Comercio: {{ name || 'N/A' }})
+      </p>
+    </div>
+  </div>
+
+  @if (isLoading) {
+    <div class="text-center p-10 text-gray-500">Cargando datos de fidelización...</div>
+  } @else if (errorMessage) {
+    <div class="text-center p-10 text-red-500 border border-red-300 bg-red-50 rounded-lg">
+      <p class="font-semibold">{{ errorMessage }}</p>
+    </div>
+  } @else if (report) {
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 ">
+      
+      <div [class]="{
+          'bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border-l-4': true,
+          'border-green-500': report.fidelizationLevel === 'Platino',
+          'border-blue-500': report.fidelizationLevel === 'Oro',
+          'border-yellow-500': report.fidelizationLevel === 'Plata',
+          'border-gray-500': report.fidelizationLevel === 'Bronce' || report.fidelizationLevel === 'string' 
+      }">
+        <div class="flex items-center space-x-4 ">
+          <fa-icon [icon]="faLevel" class="text-4xl text-gray-500"></fa-icon>
+          <div>
+            <p class="text-sm font-medium text-gray-500 uppercase">Nivel de Fidelización</p>
+            <p class="text-2xl font-extrabold text-gray-900 dark:text-white">
+              {{ report.fidelizationLevel }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-indigo-50 dark:bg-indigo-900 rounded-xl shadow-lg p-6 md:col-span-2">
+        <div class="flex items-center space-x-4">
+            <fa-icon [icon]="faTotal" class="text-4xl text-indigo-600 dark:text-indigo-300"></fa-icon>
+            <div>
+              <p class="text-sm font-medium text-indigo-600 dark:text-indigo-300 uppercase">Total Bruto Calculado</p>
+              <p class="text-4xl font-extrabold text-gray-900 dark:text-white">
+                ${{ report.Total | number: '1.2-2' }}
+              </p>
+            </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
+      <div class="bg-green-50 dark:bg-gray-800 rounded-xl shadow-lg p-6 border-t-4 border-green-600">
+        <div class="flex items-center space-x-3 text-green-700 dark:text-green-400 mb-4">
+            <fa-icon [icon]="faDeliveries" class="text-3xl"></fa-icon>
+            <h2 class="text-xl font-bold">Entregas Exitosas</h2>
+        </div>
+        <dl class="space-y-3">
+          <div class="flex justify-between items-center pb-2 border-b border-green-100 dark:border-gray-700">
+            <dt class="text-gray-700 dark:text-gray-300">Total de Entregas:</dt>
+            <dd class="text-lg font-bold text-green-600">{{ report.deliveries.totalCount | number }}</dd>
+          </div>
+          <div class="flex justify-between items-center pb-2 border-b border-green-100 dark:border-gray-700">
+            <dt class="text-gray-700 dark:text-gray-300">Valor Bruto de Envíos:</dt>
+            <dd class="text-lg font-bold text-gray-900 dark:text-white">${{ report.deliveries.totalAmount | number: '1.2-2' }}</dd>
+          </div>
+          <div class="flex justify-between items-center pb-2 border-b border-green-100 dark:border-gray-700">
+            <dt class="text-gray-700 dark:text-gray-300">Porcentaje de Fidelización Aplicado:</dt>
+            <dd class="text-lg font-bold text-green-600">
+                <fa-icon [icon]="faPercentage" class="mr-1"></fa-icon>{{ report.deliveries.applyPercentage | number: '1.2-2' }}%
+            </dd>
+          </div>
+          <div class="flex justify-between items-center pt-2">
+            <dt class="text-lg font-bold text-gray-900 dark:text-white">Valor Neto (SubTotal):</dt>
+            <dd class="text-xl font-extrabold text-green-700 dark:text-green-400">${{ report.deliveries.subTotalAmount | number: '1.2-2' }}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="bg-red-50 dark:bg-gray-800 rounded-xl shadow-lg p-6 border-t-4 border-red-600">
+        <div class="flex items-center space-x-3 text-red-700 dark:text-red-400 mb-4">
+            <fa-icon [icon]="faCancelled" class="text-3xl"></fa-icon>
+            <h2 class="text-xl font-bold">Entregas Canceladas</h2>
+        </div>
+        <dl class="space-y-3">
+          <div class="flex justify-between items-center pb-2 border-b border-red-100 dark:border-gray-700">
+            <dt class="text-gray-700 dark:text-gray-300">Total de Cancelaciones:</dt>
+            <dd class="text-lg font-bold text-red-600">{{ report.cancelledDeliveries.totalCount | number }}</dd>
+          </div>
+          <div class="flex justify-between items-center pb-2 border-b border-red-100 dark:border-gray-700">
+            <dt class="text-gray-700 dark:text-gray-300">Valor Bruto Cancelado:</dt>
+            <dd class="text-lg font-bold text-gray-900 dark:text-white">${{ report.cancelledDeliveries.totalAmount | number: '1.2-2' }}</dd>
+          </div>
+          <div class="flex justify-between items-center pb-2 border-b border-red-100 dark:border-gray-700">
+            <dt class="text-gray-700 dark:text-gray-300">Porcentaje de Cargo Aplicado:</dt>
+            <dd class="text-lg font-bold text-red-600">
+                <fa-icon [icon]="faPercentage" class="mr-1"></fa-icon>{{ report.cancelledDeliveries.applyPercentage | number: '1.2-2' }}%
+            </dd>
+          </div>
+          <div class="flex justify-between items-center pt-2">
+            <dt class="text-lg font-bold text-gray-900 dark:text-white">Costo por Cancelaciones (SubTotal):</dt>
+            <dd class="text-xl font-extrabold text-red-700 dark:text-red-400">${{ report.cancelledDeliveries.subTotalAmount | number: '1.2-2' }}</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  }
+</div>

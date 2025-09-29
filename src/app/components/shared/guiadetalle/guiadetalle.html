@@ -21,44 +21,56 @@
             <div class="flex flex-col items-center flex-1 relative">
                 @if (statusId > 1) {
                 <div class="absolute left-0 top-4 w-full h-1 -z-10 transition-colors duration-300"
-                    [class]="guideInfo.status.id >= statusId ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'">
+                    [class]="guideInfo.status.id >= statusId ? 
+                             (isCancelledOrRejected() ? 'bg-gray-300 dark:bg-gray-600' : 
+                              (isCompletedStatus() ? 'bg-green-600' : 'bg-blue-600')) : 
+                             'bg-gray-300 dark:bg-gray-600'">
                 </div>
                 }
 
                 <div class="relative z-10">
                     <fa-icon [icon]="statusIcons[statusId]"
-                        [class]="isCurrentStatus(statusId) ? 
-                                 'text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800 border-2 border-blue-600' : 
-                                 (guideInfo.status.id > statusId ? 
-                                 'text-green-600 dark:text-green-400 bg-white dark:bg-gray-800 border-2 border-green-600' :
-                                 'text-gray-300 dark:text-gray-600 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600')"
-                        class="w-10 h-10 md:w-12 md:h-12 p-2 rounded-full transition-all duration-300">
+                        [class]="getStatusIconClass(statusId)">
                     </fa-icon>
                 </div>
 
-                <span [class]="isCurrentStatus(statusId) ? 
-                              'font-bold text-blue-600 dark:text-blue-400' : 
-                              (guideInfo.status.id > statusId ? 
-                              'text-green-600 dark:text-green-400' :
-                              'text-gray-400 dark:text-gray-500')"
-                    class="text-xs md:text-sm text-center mt-2 whitespace-nowrap">
+                <span [class]="getStatusTextClass(statusId)">
                     {{ statusNames[statusId] }}
                 </span>
 
-                @if (isCurrentStatus(statusId)) {
+                @if (isCurrentStatus(statusId) && !isCancelledOrRejected() && !isCompletedStatus()) {
                 <div class="w-2 h-2 bg-blue-600 rounded-full mt-1 animate-pulse"></div>
+                }
+                @if (isCurrentStatus(statusId) && isCompletedStatus()) {
+                <div class="w-2 h-2 bg-green-600 rounded-full mt-1"></div>
+                }
+                @if (isCurrentStatus(statusId) && isCancelledOrRejected()) {
+                <div class="w-2 h-2 bg-red-600 rounded-full mt-1 animate-pulse"></div>
                 }
             </div>
             }
         </div>
     </div>
 
-    <div class="text-center mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-        <p class="text-lg font-bold text-blue-700 dark:text-blue-300">
+    <div class="text-center mb-6 p-4 rounded-lg"
+        [class]="isCancelledOrRejected() ? 
+                 'bg-red-50 dark:bg-red-900/20' : 
+                 (isCompletedStatus() ? 
+                 'bg-green-50 dark:bg-green-900/20' : 
+                 'bg-blue-50 dark:bg-blue-900/20')">
+        <p [class]="isCancelledOrRejected() ? 
+                   'text-lg font-bold text-red-700 dark:text-red-300' : 
+                   (isCompletedStatus() ? 
+                   'text-lg font-bold text-green-700 dark:text-green-300' : 
+                   'text-lg font-bold text-blue-700 dark:text-blue-300')">
             Estado actual: <span class="text-xl">{{ guideInfo.status.name }}</span>
         </p>
-        <p class="text-sm text-blue-600 dark:text-blue-400 mt-1">
-            Última actualización: {{ guideInfo.updatedAt | date:'short' }}
+        <p [class]="isCancelledOrRejected() ? 
+                   'text-sm text-red-600 dark:text-red-400 mt-1' : 
+                   (isCompletedStatus() ? 
+                   'text-sm text-green-600 dark:text-green-400 mt-1' : 
+                   'text-sm text-blue-600 dark:text-blue-400 mt-1')">
+            Última actualización: {{ guideInfo.updatedAt |  date:'dd/MM/yyyy - HH:mm' }}
         </p>
     </div>
 
@@ -77,7 +89,7 @@
                 <p><strong>Destinatario:</strong> {{ guideInfo.recipient }}</p>
                 <p><strong>Dirección:</strong> {{ guideInfo.address }}</p>
                 <p><strong>Precio:</strong> ${{ guideInfo.price | number: '1.2-2' }}</p>
-                <p><strong>Fecha de Creación:</strong> {{ guideInfo.createdAt | date:'shortDate' }}</p>
+                <p><strong>Fecha de Creación:</strong> {{ guideInfo.createdAt |  date:'dd/MM/yyyy' }}</p>
             </div>
         </div>
 

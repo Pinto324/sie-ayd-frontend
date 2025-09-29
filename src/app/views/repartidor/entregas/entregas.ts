@@ -240,24 +240,16 @@ submitDelivery() {
       headers: this.getFormDataHeaders() 
     }).subscribe({
       next: (response) => {
-        console.log('Respuesta del servidor:', response);
         this.showAlert('success', `Entrega marcada como finalizada correctamente`);
         this.closeDeliveryModal();
         this.loadAssignments();
       },
       error: (httpError) => {
-        console.error('Error completo:', httpError);
-        
-        // Mejorar el manejo de errores
-        let errorMessage = 'Error al finalizar la entrega. Por favor, intente de nuevo.';
-        
-        if (httpError.error && httpError.error.message) {
-          errorMessage = httpError.error.message;
-        } else if (httpError.status === 500) {
-          errorMessage = 'Error interno del servidor. Contacte al administrador.';
-        }
-        
-        this.showAlert('danger', errorMessage);
+        const errors: string[] = this.authService.extractErrorMessages(
+                    httpError, 
+                    'Error al crear empleado. Por favor, intente de nuevo.' // Mensaje por defecto
+                );
+            this.showAlert('danger', errors);
       }
     });
   }

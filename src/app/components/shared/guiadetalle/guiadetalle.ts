@@ -133,4 +133,68 @@ export class Guiadetalle implements OnChanges {
   isCurrentStatus(statusId: number): boolean {
     return this.guideInfo?.status.id === statusId;
   }
+
+  isCompletedStatus(): boolean {
+  return this.guideInfo?.status.id === 5; // Entregada
+}
+
+isCancelledOrRejected(): boolean {
+  return this.guideInfo?.status.id === 6 || this.guideInfo?.status.id === 7; // Cancelada o Rechazada
+}
+
+getStatusIconClass(statusId: number): string {
+  const baseClasses = 'w-10 h-10 md:w-12 md:h-12 p-2 rounded-full transition-all duration-300';
+  
+  if (this.isCancelledOrRejected()) {
+    // Si está cancelada/rechazada, todos en gris excepto el estado actual en rojo
+    if (this.isCurrentStatus(statusId)) {
+      return `${baseClasses} text-red-600 dark:text-red-400 bg-white dark:bg-gray-800 border-2 border-red-600`;
+    }
+    return `${baseClasses} text-gray-300 dark:text-gray-600 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600`;
+  }
+  
+  if (this.isCompletedStatus()) {
+    // Si está completada, todos en verde incluyendo el estado actual
+    if (this.guideInfo!.status.id >= statusId) {
+      return `${baseClasses} text-green-600 dark:text-green-400 bg-white dark:bg-gray-800 border-2 border-green-600`;
+    }
+    return `${baseClasses} text-gray-300 dark:text-gray-600 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600`;
+  }
+  
+  // Comportamiento normal para otros estados
+  if (this.isCurrentStatus(statusId)) {
+    return `${baseClasses} text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800 border-2 border-blue-600`;
+  } else if (this.guideInfo!.status.id > statusId) {
+    return `${baseClasses} text-green-600 dark:text-green-400 bg-white dark:bg-gray-800 border-2 border-green-600`;
+  } else {
+    return `${baseClasses} text-gray-300 dark:text-gray-600 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600`;
+  }
+}
+
+getStatusTextClass(statusId: number): string {
+  const baseClasses = 'text-xs md:text-sm text-center mt-2 whitespace-nowrap';
+  
+  if (this.isCancelledOrRejected()) {
+    if (this.isCurrentStatus(statusId)) {
+      return `${baseClasses} font-bold text-red-600 dark:text-red-400`;
+    }
+    return `${baseClasses} text-gray-400 dark:text-gray-500`;
+  }
+  
+  if (this.isCompletedStatus()) {
+    if (this.guideInfo!.status.id >= statusId) {
+      return `${baseClasses} text-green-600 dark:text-green-400`;
+    }
+    return `${baseClasses} text-gray-400 dark:text-gray-500`;
+  }
+  
+  // Comportamiento normal
+  if (this.isCurrentStatus(statusId)) {
+    return `${baseClasses} font-bold text-blue-600 dark:text-blue-400`;
+  } else if (this.guideInfo!.status.id > statusId) {
+    return `${baseClasses} text-green-600 dark:text-green-400`;
+  } else {
+    return `${baseClasses} text-gray-400 dark:text-gray-500`;
+  }
+}
 }

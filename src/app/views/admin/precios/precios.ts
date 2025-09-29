@@ -14,10 +14,8 @@ import { FilterOption } from '../../../interfaces/filter-option.interface';
 export class Precios implements OnInit {
   selectedFilter: string = 'todos';
 filterOptions: FilterOption[] = [
-    { value: 'todos', label: 'Todos', iconClass: 'fas fa-list-ul' },
-    { value: 'activos', label: 'Activos', iconClass: 'fas fa-check-circle' },
-    { value: 'pendientes', label: 'Pendientes', iconClass: 'fas fa-hourglass-half' },
-    { value: 'completados', label: 'Completados', iconClass: 'fas fa-clipboard-check' },
+    { value: 'todos', label: 'Fidelización', iconClass: 'fas fa-list-ul' },
+    { value: 'activos', label: 'Paquetes', iconClass: 'fas fa-check-circle' },
   ];
   // Variables booleanas para controlar qué componentes mostrar
   showTodos: boolean = true;

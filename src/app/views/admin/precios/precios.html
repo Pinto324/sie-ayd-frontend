@@ -8,22 +8,6 @@
       (filterSelected)="onFilterSelected($event)">
     </app-filtroseleccion>
 
-    <div class="mt-8">
-        @if (showTodos) {
-            <p class="text-xl text-center">Contenido de la vista Todos (puedes mostrar Fidelización y Paquetes)</p>
-            <app-fidelizacion></app-fidelizacion>
-            <app-paquetes></app-paquetes>
-        }
-        @if (showActivos) {
-            <app-paquetes></app-paquetes> 
-        }
-        @if (showPendientes) {
-            <p class="text-xl text-center">Contenido de la vista Pendientes</p>
-        }
-        @if (showCompletados) {
-            <p class="text-xl text-center">Contenido de la vista Completados</p>
-        }
-    </div>
 </div>
     <!-- Componentes que se muestran según la selección -->
     <div class="mt-8 grid grid-cols-1 gap-6">

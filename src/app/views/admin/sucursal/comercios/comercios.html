@@ -1,71 +1,85 @@
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-        <div>
+
+        @if (viewMode === 'table') {
+                    <div>
             <h1 class="text-3xl font-bold text-gray-900 dark:text-black">Gestión de Comercios</h1>
             <p class="text-gray-600 dark:text-black-300 mt-2">Administra los comercios ya registrados</p>
         </div>
-
-        <div class="flex gap-4 mt-4 md:mt-0">
-            <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <fa-icon [icon]="faSearch" class="text-gray-500"></fa-icon>
+            <div class="flex gap-4 mt-4 md:mt-0">
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                        <fa-icon [icon]="faSearch" class="text-gray-500"></fa-icon>
+                    </div>
+                    <input type="text" [(ngModel)]="searchTerm" (input)="searchCommerces()"
+                        class="pl-10 p-2.5 border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                        placeholder="Buscar comercios...">
                 </div>
-                <input type="text" [(ngModel)]="searchTerm" (input)="searchCommerces()"
-                    class="pl-10 p-2.5 border border-gray-300 rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                    placeholder="Buscar comercios...">
             </div>
-        </div>
+        }
     </div>
 
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                    <tr>
-                        <th scope="col" class="px-6 py-3">Nombre del Comercio</th>
-                        <th scope="col" class="px-6 py-3">NIT</th>
-                        <th scope="col" class="px-6 py-3">Email</th>
-                        <th scope="col" class="px-6 py-3">Dirección</th>
-                        <th scope="col" class="px-6 py-3">Estado</th>
-                        <th scope="col" class="px-6 py-3">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (commerce of filteredCommerces; track commerce.id) {
-                    <tr
-                        class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
-                            {{ commerce.name }}
-                        </td>
-                        <td class="px-6 py-4">{{ commerce.nit }}</td>
-                        <td class="px-6 py-4">{{ commerce.email }}</td>
-                        <td class="px-6 py-4">{{ commerce.address }}</td>
-                        <td class="px-6 py-4">
-                            <span
-                                [class]="commerce.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
-                                class="text-xs font-medium px-2.5 py-0.5 rounded-full">
-                                {{ commerce.isActive ? 'Activo' : 'Inactivo' }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 flex gap-2">
-                            <button (click)="openEditModal(commerce)"
-                                class="px-3 py-1 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors">
-                                <fa-icon [icon]="faEdit"></fa-icon>
-                                Editar
-                            </button>
-                        </td>
-                    </tr>
-                    }
-                    @empty {
-                    <tr>
-                        <td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
-                            No se encontraron comercios
-                        </td>
-                    </tr>
-                    }
-                </tbody>
-            </table>
+    @if (viewMode === 'table') {
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">NIT</th>
+                            <th scope="col" class="px-6 py-3">Nombre</th>
+                            <th scope="col" class="px-6 py-3">Email</th>
+                            <th scope="col" class="px-6 py-3">Teléfono</th>
+                            <th scope="col" class="px-6 py-3">Dirección</th>
+                            <th scope="col" class="px-6 py-3">Estado</th>
+                            <th scope="col" class="px-6 py-3">Acciones</th> </tr>
+                    </thead>
+                    <tbody>
+                        @for (commerce of filteredCommerces; track commerce.id) {
+                            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                <td class="px-6 py-4">{{ commerce.nit }}</td>
+                                <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ commerce.name }}</td>
+                                <td class="px-6 py-4">{{ commerce.email }}</td>
+                                <td class="px-6 py-4">{{ commerce.phoneNumber }}</td>
+                                <td class="px-6 py-4">{{ commerce.address }}</td>
+                                <td class="px-6 py-4">
+                                    <span [class]="{'bg-green-100 text-green-800': commerce.isActive, 'bg-red-100 text-red-800': !commerce.isActive}"
+                                        class="text-xs font-medium me-2 px-2.5 py-0.5 rounded dark:bg-gray-700">
+                                        {{ commerce.isActive ? 'Activo' : 'Inactivo' }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 flex gap-2">
+                                    <button (click)="openEditModal(commerce)"
+                                        class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 transition-colors flex items-center text-xs">
+                                        <fa-icon [icon]="faEdit" class="mr-1"></fa-icon>
+                                        Editar
+                                    </button>
+                                    <button (click)="openFidelizationReport(commerce)"
+                                        class="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-lg hover:bg-indigo-200 transition-colors flex items-center text-xs">
+                                        <fa-icon [icon]="faChartLine" class="mr-1"></fa-icon>
+                                        Fidelización
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
+    }
+
+    @if (viewMode === 'report' && selectedCommerceId) {
+        <div class="mt-8">
+            <button 
+                (click)="goBackToTable()"
+                class="flex items-center gap-2 px-4 py-2.5 text-blue-600 rounded-lg hover:bg-gray-100 transition-colors mb-4">
+                <fa-icon [icon]="faArrowLeft"></fa-icon>
+                Volver a la Gestión de Comercios
+            </button>
+
+            <app-fidelizacioncomercio [commerceId]="selectedCommerceId" [name]="nameCommerceId"></app-fidelizacioncomercio>
+        </div>
+    }
+
     </div>
 
     @if (isModalOpen) {
@@ -162,4 +176,3 @@
         </div>
     </div>
     }
-</div>
