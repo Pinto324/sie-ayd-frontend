@@ -5,6 +5,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../services/auth';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faPlus, faEdit, faTrash, faEye, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { Alert } from '../../../components/shared/alert/alert';
+import { AlertType } from '../../../components/shared/alert/alert-type.type';
 interface User {
   id: number;
   firstname: string;
@@ -33,7 +35,7 @@ interface ApiResponse {
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, FontAwesomeModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, FontAwesomeModule, Alert],
   templateUrl: './usuarios.html',
   styleUrl: './usuarios.css'
 })
@@ -52,7 +54,9 @@ export class Usuarios implements OnInit {
   faSearch = faSearch;
 
   userForm: FormGroup;
-
+  isAlertModalOpen: boolean = false;
+  alertType: AlertType = 'info';
+  alertMessage: string | string[] = '';
   private apiUrl = 'http://147.135.215.156:8090/api/v1/users?page=0&size=1000&sortBy=id&ascending=true';
   private createurl = 'http://147.135.215.156:8090/api/v1/users';
   private rolesUrl = 'http://147.135.215.156:8090/api/v1/roles';
@@ -196,11 +200,20 @@ openEditModal(user: User) {
           this.http.put(`${this.createurl}/${this.selectedUser.id}`, editPayload, { headers })
             .subscribe({
               next: () => {
+                this.showAlert('success', 'El usuario se modifico correctamente');
                 this.loadUsers();
                 this.closeModal();
               },
-              error: (error) => {
-                console.error('Error updating user:', error);
+              error: (httpError) => {
+                let errors: string[] = ['Ocurrió un error desconocido al crear el empleado.'];
+            
+            if (httpError.error && httpError.error.errors && Array.isArray(httpError.error.errors)) {
+                errors = httpError.error.errors.map((err: any) => err.message || err);
+            } else if (httpError.error && httpError.error.message) {
+                errors = [httpError.error.message];
+            } else if (httpError.message) {
+                errors = [httpError.message];
+            }
               }
             });
       } else {
@@ -217,17 +230,36 @@ openEditModal(user: User) {
         this.http.post(this.createurl, createPayload, { headers })
           .subscribe({
             next: () => {
+              this.showAlert('success', 'El usuario se creó correctamente');
               this.loadUsers();
               this.closeModal();
             },
-            error: (error) => {
-              console.error('Error creating user:', error);
+            error: (httpError) => {
+              let errors: string[] = ['Ocurrió un error desconocido al crear el empleado.'];
+            
+            if (httpError.error && httpError.error.errors && Array.isArray(httpError.error.errors)) {
+                errors = httpError.error.errors.map((err: any) => err.message || err);
+            } else if (httpError.error && httpError.error.message) {
+                errors = [httpError.error.message];
+            } else if (httpError.message) {
+                errors = [httpError.message];
+            }
             }
           });
       }
     }
   }
-
+  //manejo modal:
+  showAlert(type: AlertType, message: string | string[]): void {
+    this.alertType = type;
+    this.alertMessage = message;
+    this.isAlertModalOpen = true;
+    this.cdr.markForCheck();
+  }
+  closeAlertModal(): void {
+    this.isAlertModalOpen = false;
+    this.alertMessage = '';
+  }
   deleteUser(user: User) {
     if (confirm(`¿Estás seguro de que quieres inhabilitar a ${user.firstname} ${user.lastname}?`)) {
       const headers = this.getHeaders();

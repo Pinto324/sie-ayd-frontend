@@ -104,6 +104,7 @@ export class GuiasCliente implements OnInit {
     this.http.get<Guide[]>(this.guidesApiUrl, { headers }).subscribe({
       next: (response) => {
         this.guides = response;
+        console.log(response);
         this.searchGuides(this.searchTerm);
         this.isLoadingData = false;
         this.cdr.markForCheck();

@@ -10,7 +10,8 @@ import {
   faTimes,        // Rechazar / Cerrar Modal
   faEye,          // Detalles
 } from '@fortawesome/free-solid-svg-icons';
-
+import { Alert } from '../../../components/shared/alert/alert';
+import { AlertType } from '../../../components/shared/alert/alert-type.type';
 // --- Interfaces de datos (Reutilizadas y adaptadas) ---
 
 interface Status { id: number; name: string; description: string; }
@@ -29,7 +30,7 @@ interface Assignment {
 }
 @Component({
   selector: 'app-asignacion',
-  imports: [CommonModule, FormsModule, FontAwesomeModule, DatePipe, DecimalPipe],
+  imports: [CommonModule, FormsModule, FontAwesomeModule,Alert, DatePipe, DecimalPipe],
   templateUrl: './asignacion.html',
   styleUrl: './asignacion.css'
 })
@@ -49,7 +50,9 @@ export class AsignacionRepartidor implements OnInit {
   // Estado del Modal de Detalles
   isDetailModalOpen: boolean = false;
   selectedAssignmentDetail: Assignment | null = null;
-
+  isAlertModalOpen: boolean = false;
+  alertType: AlertType = 'info';
+  alertMessage: string | string[] = '';
   // Iconos
   faSearch = faSearch;
   faAccept = faCheck;
@@ -59,7 +62,7 @@ export class AsignacionRepartidor implements OnInit {
   // URLs de la API
   private assignmentsApiUrl = 'http://147.135.215.156:8090/api/v1/assignments';
   private acceptAssignmentUrl = 'http://147.135.215.156:8090/api/v1/assignments/accept';
-  private rejectAssignmentUrl = 'http://147.135.215.156:8090/api/v1/assignments/cancel';
+  private rejectAssignmentUrl = 'http://147.135.215.156:8090/api/v1/assignments/reject';
 
 
   constructor(
@@ -95,7 +98,6 @@ export class AsignacionRepartidor implements OnInit {
         this.cdr.markForCheck();
       },
       error: (error) => {
-        console.error('Error al cargar las asignaciones:', error);
         this.errorMessage = 'Error al cargar las asignaciones.';
         this.isLoading = false;
       }
@@ -140,12 +142,21 @@ export class AsignacionRepartidor implements OnInit {
     // Lógica para enviar la acción POST
     this.http.post(`${url}/${assignmentId}`, {}, { headers: this.getHeaders() }).subscribe({
       next: () => {
-        alert(`Asignación ${actionName} exitosamente.`);
+        this.showAlert('success', `Asignación ${actionName} exitosamente.`);
         this.loadAssignments(); // Recargar la tabla para reflejar el cambio
       },
-      error: (error) => {
-        console.error(`Error al procesar la acción (${actionName}):`, error);
-        alert(`Error al procesar la acción (${actionName}). Verifique la consola.`);
+      error: (httpError) => {
+        let errors: string[] = ['Ocurrió un error desconocido al cambiar el estado de la asignación'];
+            
+            if (httpError.error && httpError.error.errors && Array.isArray(httpError.error.errors)) {
+                errors = httpError.error.errors.map((err: any) => err.message || err);
+            } else if (httpError.error && httpError.error.message) {
+                errors = [httpError.error.message];
+            } else if (httpError.message) {
+                errors = [httpError.message];
+            }
+
+            this.showAlert('danger', errors);
       }
     });
   }
@@ -160,5 +171,16 @@ export class AsignacionRepartidor implements OnInit {
   closeDetailModal() {
     this.isDetailModalOpen = false;
     this.selectedAssignmentDetail = null;
+  }
+      //manejo modal:
+  showAlert(type: AlertType, message: string | string[]): void {
+    this.alertType = type;
+    this.alertMessage = message;
+    this.isAlertModalOpen = true;
+    this.cdr.markForCheck();
+  }
+  closeAlertModal(): void {
+    this.isAlertModalOpen = false;
+    this.alertMessage = '';
   }
 }

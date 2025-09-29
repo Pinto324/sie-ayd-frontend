@@ -22,7 +22,12 @@
         (actionClick)="handleTableAction($event)">
     </app-table>
 </div>
-
+<app-alert 
+  [isOpen]="isAlertModalOpen"
+  [type]="alertType"
+  [message]="alertMessage"
+  (closed)="closeAlertModal()">
+</app-alert>
 <app-modal [isOpen]="isModalOpen" [title]="isEditMode ? 'Modificar Empleado' : 'Crear Nuevo Empleado'" size="lg"
     (close)="closeModal()">
 

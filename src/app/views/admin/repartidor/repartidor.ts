@@ -12,7 +12,8 @@ import {
 import { Modal } from '../../../components/shared/modal/modal';
 import { Searchtable } from '../../../components/shared/searchtable/searchtable';
 import { Table, TableColumn, TableAction } from '../../../components/shared/table/table';
-
+import { Alert } from '../../../components/shared/alert/alert';
+import { AlertType } from '../../../components/shared/alert/alert-type.type';
 // --- Interfaces para Empleados y Tipos de Contrato ---
 
 interface ContractType {
@@ -50,7 +51,7 @@ interface DeliveryPersonResponse {
 @Component({
   selector: 'app-repartidor',
   standalone: true, // Asegúrate de que esto esté aquí si es un standalone component
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, FontAwesomeModule, DatePipe, DecimalPipe, Modal, Searchtable, Table],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Alert,FontAwesomeModule, DatePipe, DecimalPipe, Modal, Searchtable, Table],
   templateUrl: './repartidor.html',
   styleUrl: './repartidor.css'
 })
@@ -64,7 +65,9 @@ export class Repartidor implements OnInit {
   isEditMode: boolean = false;
   isLoadingData: boolean = true;
   isLoadingModal: boolean = false; // Para el botón de enviar en el modal
-
+  isAlertModalOpen: boolean = false;
+  alertType: AlertType = 'info';
+  alertMessage: string | string[] = '';
   // Formulario y Empleado Seleccionado
   employeeForm: FormGroup;
   selectedEmployee: Employee | null = null;
@@ -98,14 +101,14 @@ export class Repartidor implements OnInit {
       icon: faEdit,
       action: 'edit',
       class: 'px-3 py-1 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors'
-    },
+    }/*,
     {
       label: 'Desactivar',
       icon: faBan,
       action: 'toggle_active',
       condition: (item: Employee) => item.isActive,
       class: 'px-3 py-1 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors'
-    },
+    },*/
   ];
   // ----------------------------------------
 
@@ -322,14 +325,21 @@ export class Repartidor implements OnInit {
       this.http.put(`${this.createEmployeeApiUrl}/${this.selectedEmployee.userId}`, editPayload, { headers })
         .subscribe({
           next: () => {
-            alert('Empleado actualizado exitosamente.');
+            this.showAlert('success', 'El usuario se modifico correctamente');
             this.loadEmployees();
             this.isLoadingModal = false;
             this.closeModal();
           },
-          error: (error) => {
-            console.error('Error updating employee:', error);
-            alert('Error al actualizar empleado. Revise la consola.');
+          error: (httpError) => {
+            let errors: string[] = ['Ocurrió un error desconocido al crear el empleado.'];
+            
+            if (httpError.error && httpError.error.errors && Array.isArray(httpError.error.errors)) {
+                errors = httpError.error.errors.map((err: any) => err.message || err);
+            } else if (httpError.error && httpError.error.message) {
+                errors = [httpError.error.message];
+            } else if (httpError.message) {
+                errors = [httpError.message];
+            }
             this.isLoadingModal = false;
           }
         });
@@ -353,20 +363,46 @@ export class Repartidor implements OnInit {
         }
       };
 
-      this.http.post(this.createEmployeeApiUrl, payload, { headers })
-        .subscribe({
-          next: () => {
-            alert('Empleado creado exitosamente.');
+this.http.post<any>(this.createEmployeeApiUrl, payload, { headers })
+    .subscribe({
+        next: (response) => {
+            const successMessages: string[] = [
+                '¡El empleado ha sido creado exitosamente!',
+                `Usuario: ${response.email}`,
+                `Contraseña Temporal: ${response.password}`
+            ];
+            this.showAlert('success', successMessages);
+            
             this.loadEmployees();
             this.isLoadingModal = false;
-            this.closeModal();
-          },
-          error: (error) => {
-            console.error('Error creating employee:', error);
-            alert('Error al crear empleado. Revise la consola.');
+            this.closeModal(); 
+        },
+        error: (httpError) => {
             this.isLoadingModal = false;
-          }
-        });
+            let errors: string[] = ['Ocurrió un error desconocido al crear el empleado.'];
+            
+            if (httpError.error && httpError.error.errors && Array.isArray(httpError.error.errors)) {
+                errors = httpError.error.errors.map((err: any) => err.message || err);
+            } else if (httpError.error && httpError.error.message) {
+                errors = [httpError.error.message];
+            } else if (httpError.message) {
+                errors = [httpError.message];
+            }
+
+            this.showAlert('danger', errors);
+        }
+    });
     }
+  }
+    //manejo modal:
+  showAlert(type: AlertType, message: string | string[]): void {
+    this.alertType = type;
+    this.alertMessage = message;
+    this.isAlertModalOpen = true;
+    this.cdr.markForCheck();
+  }
+  closeAlertModal(): void {
+    this.isAlertModalOpen = false;
+    this.alertMessage = '';
   }
 }
