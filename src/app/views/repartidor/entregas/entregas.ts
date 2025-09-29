@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { AuthService } from '../../../services/auth'; // Asegúrate de que la ruta sea correcta
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
@@ -82,17 +82,22 @@ export class EntregasRepartidor implements OnInit {
     this.loadAssignments();
   }
 
- private getHeaders(contentType: boolean = true): HttpHeaders { 
+private getJsonHeaders(): HttpHeaders { 
     const token = this.authService.getToken();
-    let headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json' 
     });
-    // Si se envía FormData, no se establece Content-Type para que el navegador lo maneje automáticamente
-    if (contentType) {
-        headers = headers.set('Content-Type', 'application/json');
-    }
-    return headers;
   }
+
+private getFormDataHeaders(): HttpHeaders {
+  const token = this.authService.getToken();
+  // IMPORTANTE: No establecer Content-Type manualmente
+  return new HttpHeaders({
+    'Authorization': `Bearer ${token}`
+    // ELIMINA completamente 'Content-Type'
+  });
+}
 
   // --- Carga de Asignaciones ACEPTADAS ---
 
@@ -100,8 +105,8 @@ export class EntregasRepartidor implements OnInit {
     this.viewMode = 'table';
     this.isLoading = true;
     this.errorMessage = null;
-
-    this.http.get<Assignment[]>(this.assignmentsApiUrl, { headers: this.getHeaders() }).subscribe({
+    let params = new HttpParams().set('status', 'ACCEPTED'); 
+    this.http.get<Assignment[]>(this.assignmentsApiUrl, { headers: this.getJsonHeaders(), params: params }).subscribe({
       next: (response) => {
         // Filtrar guías con ID de estado relevante (2, 3, 4) para el flujo de trabajo del repartidor
         this.assignments = response.filter(a => [2, 3, 4].includes(a.guide.status.id));
@@ -145,7 +150,7 @@ export class EntregasRepartidor implements OnInit {
     }
     const payload = { statusId: newStatusId };
     if (confirm(`¿Confirmas cambiar el estado de la guía #${assignment.guide.code} a "${actionText}"?`)) {
-      this.http.put(`${this.guideWorkUrl}/${assignment.guide.id}`, payload, { headers: this.getHeaders() }).subscribe({
+       this.http.put(`${this.guideWorkUrl}/${assignment.guide.id}`, payload, { headers: this.getJsonHeaders() }).subscribe({
         next: () => {
           this.showAlert('success', `Guía #${assignment.guide.code} actualizada a "${actionText}" exitosamente.`);
           if (this.viewMode === 'detail') {
@@ -181,69 +186,104 @@ export class EntregasRepartidor implements OnInit {
     this.deliveryFiles = [null, null, null]; 
   }
   
-  onFileSelected(event: Event, index: number) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.deliveryFiles[index] = input.files[0];
-    } else {
-      this.deliveryFiles[index] = null;
-    }
+onFileSelected(event: Event, index: number) {
+  const input = event.target as HTMLInputElement;
+  if (input.files && input.files.length > 0) {
+    this.deliveryFiles[index] = input.files[0];
+    console.log(`Archivo ${index + 1} seleccionado:`, input.files[0].name);
+  } else {
+    this.deliveryFiles[index] = null;
   }
-
+  // Forzar detección de cambios
+  this.cdr.detectChanges();
+}
   isFileInputValid(): boolean {
     return this.deliveryFiles.some(file => file !== null);
   }
 
- submitDelivery() {
-    if (!this.selectedAssignment) return;
+submitDelivery() {
+  if (!this.selectedAssignment) return;
 
-    const filesToSend = this.deliveryFiles.filter(file => file !== null) as File[];
+  const filesToSend = this.deliveryFiles.filter(file => file !== null) as File[];
 
-    if (filesToSend.length === 0) {
-      alert('Debe adjuntar al menos 1 imagen para finalizar la entrega.');
-      return;
-    }
-    
-    // CAMBIO CLAVE: Construir FormData
-    const formData = new FormData();
-    const guideId = this.selectedAssignment.guide.id;
+  if (filesToSend.length === 0) {
+    alert('Debe adjuntar al menos 1 imagen para finalizar la entrega.');
+    return;
+  }
 
-    // 1. Añadir el objeto de datos (guideId y notes) como JSON bajo la clave 'data'
-    const dataPayload = {
-      guideId: guideId,
-      notes: this.deliveryNotes
-    };
-    
-    // Se requiere serializar los datos no-archivo bajo una clave específica ('data')
-    formData.append('data', JSON.stringify(dataPayload));
-    
-    // 2. Añadir los archivos bajo la clave 'img'
-    filesToSend.forEach((file) => {
-      // Usamos 'img' como nombre de campo. La API debería poder manejar múltiples archivos con el mismo nombre en FormData.
-      formData.append('img', file, file.name); 
+  // Crear FormData con la estructura EXACTA que espera el backend
+  const formData = new FormData();
+  const guideId = this.selectedAssignment.guide.id;
+
+  // 1. Añadir el objeto 'data' como BLOB (igual que en el ejemplo)
+  const dataPayload = {
+    guideId: guideId,
+    notes: this.deliveryNotes
+  };
+  
+  // USAR BLOB como en el ejemplo que te enviaron
+  formData.append('data', new Blob([JSON.stringify(dataPayload)], { 
+    type: 'application/json' 
+  }));
+  
+  // 2. Añadir los archivos - usa el mismo patrón
+  filesToSend.forEach((file, index) => {
+    // Según el ejemplo, usa 'imgs' para las imágenes
+    formData.append('img', file, file.name);
+  });
+
+  // Debug: verificar lo que se envía
+  this.logFormData(formData);
+
+  if (confirm(`¿Confirma finalizar la entrega de la guía #${this.selectedAssignment.guide.code}?`)) {
+    this.http.post(this.guideDeliverUrl, formData, { 
+      headers: this.getFormDataHeaders() 
+    }).subscribe({
+      next: (response) => {
+        console.log('Respuesta del servidor:', response);
+        this.showAlert('success', `Entrega marcada como finalizada correctamente`);
+        this.closeDeliveryModal();
+        this.loadAssignments();
+      },
+      error: (httpError) => {
+        console.error('Error completo:', httpError);
+        
+        // Mejorar el manejo de errores
+        let errorMessage = 'Error al finalizar la entrega. Por favor, intente de nuevo.';
+        
+        if (httpError.error && httpError.error.message) {
+          errorMessage = httpError.error.message;
+        } else if (httpError.status === 500) {
+          errorMessage = 'Error interno del servidor. Contacte al administrador.';
+        }
+        
+        this.showAlert('danger', errorMessage);
+      }
     });
+  }
+}
 
-    if (confirm(`¿Confirma finalizar la entrega de la guía #${this.selectedAssignment.guide.code}?`)) {
-        // CAMBIO CLAVE: Enviar FormData sin Content-Type explícito
-        this.http.post(this.guideDeliverUrl, formData, { headers: this.getHeaders(false) }).subscribe({ 
-          next: () => {
-          this.showAlert('success', `Entrega marcada como finalizada correctamente`);
-          if (this.viewMode === 'detail') {
-              this.goBackToTable(); // Volver a la tabla y recargar
-          } else {
-              this.loadAssignments(); // Recargar solo la tabla
-          }
-          },
-          error: (httpError) => {
-            const errors: string[] = this.authService.extractErrorMessages(
-                                httpError, 
-                                'Error al crear empleado. Por favor, intente de nuevo.' // Mensaje por defecto
-                            );
-                        this.showAlert('danger', errors);
-          }
-        });
+// Método auxiliar para debuggear FormData
+private logFormData(formData: FormData) {
+  console.log('=== FormData Contents ===');
+  for (let pair of formData.entries()) {
+    const key = pair[0];
+    const value = pair[1];
+    if (value instanceof File) {
+      console.log(`${key}: File - ${value.name} (${value.type}, ${value.size} bytes)`);
+    } else {
+      console.log(`${key}:`, value);
+      // Si es el campo 'data', también muestra el objeto parseado
+      if (key === 'data') {
+        try {
+          console.log(`${key} (parsed):`, JSON.parse(value as string));
+        } catch (e) {
+          console.log(`${key} (parse error):`, e);
+        }
+      }
     }
   }
+}
         //manejo alert:
   showAlert(type: AlertType, message: string | string[]): void {
     this.alertType = type;
