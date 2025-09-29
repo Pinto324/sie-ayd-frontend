@@ -5,7 +5,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../services/auth'; // Asegúrate de que la ruta sea correcta
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import {
-  faPlus, faEdit, faSearch, faUserTie, faBan
+  faPlus, faEdit, faSearch, faUserTie, faBan,faFileContract, faArrowLeft
 } from '@fortawesome/free-solid-svg-icons';
 
 // Importar componentes compartidos (Ajustar las rutas según tu proyecto)
@@ -21,7 +21,19 @@ interface ContractType {
   name: string;
 }
 
+interface Contract {
+  id: number;
+  contractType: string;
+  baseSalary: number;
+  commissionPercentage: number;
+  endDate: string; // Formato "YYYY-MM-DD"
+  startDate: string;
+  contractStatus: 'ACTIVO' | 'BAJA' | 'EXPIRADO' | string;
+}
+
+
 interface Employee {
+  id: number;
   userId: number;
   firstname: string;
   lastname: string;
@@ -32,10 +44,14 @@ interface Employee {
   use2fa: boolean;
   contractId: number;
   contractStatus: string;
-  // CAMPOS AÑADIDOS PARA EL EDITAR (Asumiendo que vienen en la data)
   birthDate: string;
   address: string;
   emergencyContact: string;
+}
+
+interface DeliveryPersonDetail extends Employee {
+  contract: Contract;
+  commissions: number;
 }
 
 // Interfaz para la respuesta paginada de la API
@@ -46,7 +62,13 @@ interface DeliveryPersonResponse {
   totalElements: number;
   totalPages: number;
 }
-
+interface ContractHistoryResponse {
+    content: Contract[];
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+}
 
 @Component({
   selector: 'app-repartidor',
@@ -56,6 +78,7 @@ interface DeliveryPersonResponse {
   styleUrl: './repartidor.css'
 })
 export class Repartidor implements OnInit {
+  viewMode: 'table' | 'contracts' = 'table'; 
   // Datos y Estados
   employees: Employee[] = [];
   filteredEmployees: Employee[] = [];
@@ -68,21 +91,33 @@ export class Repartidor implements OnInit {
   isAlertModalOpen: boolean = false;
   alertType: AlertType = 'info';
   alertMessage: string | string[] = '';
+    contractHistory: Contract[] = [];
   // Formulario y Empleado Seleccionado
   employeeForm: FormGroup;
   selectedEmployee: Employee | null = null;
-
+  errorMessage: string | null = null;
   // Íconos
   faPlus = faPlus;
   faEdit = faEdit;
   faSearch = faSearch;
   faUserTie = faUserTie;
   faBan = faBan;
-
-  // Endpoints API
+faFileContract = faFileContract; // NUEVO
+  faArrowLeft = faArrowLeft;  
+  // --- Estados de Modales y Datos de Contratos ---
+  selectedDeliveryPersonDetail: DeliveryPersonDetail | null = null; // NUEVO: Detalle completo del repartidor
+  isContractModalOpen: boolean = false; // NUEVO: Modal de Contratos
+contractModalMode: 'nuevo' | 'renovar' = 'nuevo'; 
+  contractForm: FormGroup; // NUEVO: Formulario para Nuevo/Renovar Contrato
+// Endpoints API
   private employeesApiUrl = 'http://147.135.215.156:8090/api/v1/delivery-person?page=0&size=10000';
+  private deliveryPersonDetailUrl = 'http://147.135.215.156:8090/api/v1/delivery-person'; // + /:id (userId)
   private contractTypesApiUrl = 'http://147.135.215.156:8090/api/v1/contract/type';
   private createEmployeeApiUrl = 'http://147.135.215.156:8090/api/v1/delivery-person';
+  private contractBajaUrl = 'http://147.135.215.156:8090/api/v1/contract/baja'; // + /:contractId
+  private contractNuevoUrl = 'http://147.135.215.156:8090/api/v1/contract/nuevo'; // + /:userId
+  private contractRenovarUrl = 'http://147.135.215.156:8090/api/v1/contract/renovar'; // + /:contractId
+  private contractHistoryUrl = 'http://147.135.215.156:8090/api/v1/contract/history'; // + /:userId
 
   // --- Configuración para TablaComponent ---
   tableColumns: TableColumn[] = [
@@ -92,23 +127,30 @@ export class Repartidor implements OnInit {
     { key: 'phoneNumber', header: 'Teléfono', type: 'text' },
     { key: 'email', header: 'Email', type: 'text' },
     { key: 'contractStatus', header: 'Contrato', type: 'text' },
-    { key: 'isActive', header: 'Activo', type: 'text' },
+  ];
+  historyColumns: TableColumn[] = [
+    { key: 'id', header: 'ID', type: 'text' },
+    { key: 'contractType', header: 'Tipo de Contrato', type: 'text' },
+    { key: 'baseSalary', header: 'Salario Base', type: 'currency', pipeFormat: '1.2-2' },
+    { key: 'commissionPercentage', header: '% Comisión', type: 'text' },
+    { key: 'startDate', header: 'Inicio', type: 'date', pipeFormat: 'shortDate' },
+    { key: 'endDate', header: 'Fin', type: 'date', pipeFormat: 'shortDate' },
+    { key: 'contractStatus', header: 'Estado', type: 'text' },
   ];
 
-  tableActions: TableAction[] = [
+tableActions: TableAction[] = [
     {
       label: 'Editar',
       icon: faEdit,
       action: 'edit',
       class: 'px-3 py-1 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors'
-    }/*,
-    {
-      label: 'Desactivar',
-      icon: faBan,
-      action: 'toggle_active',
-      condition: (item: Employee) => item.isActive,
-      class: 'px-3 py-1 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors'
-    },*/
+    },
+    { // NUEVA ACCIÓN DE CONTRATOS
+      label: 'Contratos',
+      icon: faFileContract,
+      action: 'view_contracts',
+      class: 'px-3 py-1 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors'
+    }
   ];
   // ----------------------------------------
 
@@ -132,6 +174,12 @@ export class Repartidor implements OnInit {
       contractTypeId: [null, Validators.required],
       baseSalary: [0, [Validators.required, Validators.min(0)]],
       commissionPercentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
+      endDate: ['', Validators.required]
+    });
+     this.contractForm = this.fb.group({
+      contractTypeId: [null],
+      baseSalary: [0],
+      commissionPercentage: [0],
       endDate: ['', Validators.required]
     });
   }
@@ -280,20 +328,216 @@ export class Repartidor implements OnInit {
     );
   }
 
-  handleTableAction(event: { action: string, item: Employee }): void {
-    // ... (Lógica de acciones de tabla sin cambios)
-    const employee = event.item;
-    switch (event.action) {
-      case 'edit':
-        this.openEditModal(employee);
-        break;
-      case 'toggle_active':
-        console.log(`Placeholder: Desactivar/Activar empleado con ID: ${employee.userId}`);
-        break;
-      default:
-        console.warn(`Acción desconocida: ${event.action}`);
+handleTableAction(event: { action: string, item: Employee }) {
+    if (event.action === 'edit') {
+      this.openEditModal(event.item);
+    } else if (event.action === 'view_contracts') {
+      this.loadDeliveryPersonContracts(event.item.userId,event.item); // Llama a la nueva lógica
     }
   }
+ /**
+   * Carga el detalle del repartidor (incluyendo el contrato) y el historial.
+   */
+  loadDeliveryPersonContracts(userId: number, employee: Employee) {
+    this.isLoadingData = true;
+    this.selectedEmployee = employee;
+    this.errorMessage = null;
+
+    // 1. Cargar el detalle del contrato actual
+    const detail$ = this.http.get<DeliveryPersonDetail>(`${this.deliveryPersonDetailUrl}/${employee.id}`, { headers: this.getHeaders() });
+    
+    // 2. Cargar el historial de contratos
+    const history$ = this.http.get<ContractHistoryResponse>(
+        `${this.contractHistoryUrl}/${employee.userId}?page=0&size=100000`, 
+        { headers: this.getHeaders() }
+    );
+    
+    // Usar forkJoin para esperar ambas peticiones (requiere importar forkJoin de 'rxjs')
+    // Nota: Si no usas 'rxjs', encadena las peticiones con .pipe(switchMap) o realiza la segunda en el 'next' de la primera.
+    // Asumiendo que SÍ usas 'rxjs' en tu proyecto para manejos complejos de observables:
+    
+    // Temporalmente, cargaremos el historial después del detalle para mantener la sencillez sin añadir un nuevo import:
+    detail$.subscribe({
+      next: (detailResponse) => {
+        this.selectedDeliveryPersonDetail = detailResponse;
+        
+        history$.subscribe({
+            next: (historyResponse) => {
+                this.contractHistory = historyResponse.content.sort((a, b) => {
+                    // Ordenar por fecha de inicio descendente (contratos más recientes primero)
+                    return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+                }); 
+                this.viewMode = 'contracts'; // Cambia la vista solo al tener todo cargado
+                this.isLoadingData = false;
+                this.cdr.markForCheck();
+            },
+            error: (httpError) => {
+                 const errors: string[] = this.authService.extractErrorMessages(
+                    httpError,
+                    'Error al obtener el historial de contratos.'
+                );
+                this.errorMessage = errors.join('. ');
+                this.isLoadingData = false;
+            }
+        });
+
+      },
+      error: (httpError) => {
+        const errors: string[] = this.authService.extractErrorMessages(
+          httpError,
+          'Error al obtener el detalle del repartidor y su contrato.'
+        );
+        this.errorMessage = errors.join('. ');
+        this.isLoadingData = false;
+      }
+    });
+  }
+/**
+   * Recarga los detalles del contrato y su historial después de una acción de POST.
+   */
+  private reloadContractView() {
+    if (this.selectedDeliveryPersonDetail && this.selectedEmployee) {
+        this.loadDeliveryPersonContracts(this.selectedDeliveryPersonDetail.userId, this.selectedEmployee);
+    }
+  }
+  /**
+   * Regresa a la vista principal de la tabla de repartidores.
+   */
+  goBackToTable() {
+    this.viewMode = 'table';
+    this.selectedDeliveryPersonDetail = null;
+    this.selectedEmployee = null;
+    this.loadEmployees(); // Recargar la tabla para reflejar posibles cambios de estado
+    this.cdr.markForCheck();
+  }
+
+  /**
+   * Determina si el contrato ha expirado comparando endDate con la fecha actual.
+   */
+  isContractExpired(endDate: string): boolean {
+    return new Date(endDate) < new Date();
+  }
+  // --- LÓGICA DE MODALES DE CONTRATO (Nuevo/Renovar) ---
+
+  /**
+   * Abre el modal para crear un nuevo contrato.
+   */
+  openNewContractModal(userId: number) {
+   this.contractModalMode = 'nuevo'; 
+    this.contractForm.reset({ baseSalary: 0, commissionPercentage: 0, contractTypeId: null });
+    this.setContractFormValidation(true);
+    this.isContractModalOpen = true;
+  }
+
+  /**
+   * Abre el modal para renovar un contrato.
+   */
+  openRenovateContractModal(contractId: number) {
+    this.contractModalMode = 'renovar'; // CORREGIDO
+    this.contractForm.reset({ endDate: '' });
+    this.setContractFormValidation(false); // Solo se requiere endDate
+    this.isContractModalOpen = true;
+  }
+
+  /**
+   * Ajusta los validadores del formulario de contrato según el modo (Nuevo o Renovar).
+   */
+  setContractFormValidation(isNew: boolean) {
+    // Campos comunes que siempre se limpian/actualizan
+    ['contractTypeId', 'baseSalary', 'commissionPercentage', 'endDate'].forEach(key => {
+      this.contractForm.get(key)?.clearValidators();
+    });
+
+    if (isNew) {
+      this.contractForm.get('contractTypeId')?.setValidators(Validators.required);
+      this.contractForm.get('baseSalary')?.setValidators([Validators.required, Validators.min(0)]);
+      this.contractForm.get('commissionPercentage')?.setValidators([Validators.required, Validators.min(0), Validators.max(100)]);
+    }
+    
+    // El campo endDate es requerido en ambos modos (Nuevo y Renovar)
+    this.contractForm.get('endDate')?.setValidators(Validators.required);
+
+    // Aplicar los cambios
+    Object.keys(this.contractForm.controls).forEach(key => {
+      this.contractForm.get(key)?.updateValueAndValidity();
+    });
+  }
+executeContractBaja(contractId: number) {
+    if (!confirm('¿Está seguro de dar de baja este contrato? Esta acción es irreversible.')) return;
+
+    this.isLoadingData = true;
+    this.http.post<any>(`${this.contractBajaUrl}/${contractId}`, {}, { headers: this.getHeaders() }).subscribe({
+      next: () => {
+        this.showAlert('success', 'Contrato dado de baja correctamente.');
+        // Forzar la recarga de los detalles para reflejar el cambio de estado
+        this.reloadContractView(); 
+        this.loadEmployees();
+        this.loadDeliveryPersonContracts(this.selectedDeliveryPersonDetail!.userId, this.selectedEmployee!);
+      },
+      error: (httpError) => {
+        const errors: string[] = this.authService.extractErrorMessages(httpError, 'Error al dar de baja el contrato.');
+        this.showAlert('danger', errors);
+        this.isLoadingData = false;
+      }
+    });
+  }
+  /**
+   * Envía los datos del formulario de contrato (Nuevo o Renovar).
+   */
+  onContractSubmit() {
+    if (!this.contractForm.valid || !this.selectedDeliveryPersonDetail) return;
+
+    this.isLoadingModal = true;
+    const formValue = this.contractForm.value;
+    const headers = this.getHeaders();
+    const userId = this.selectedDeliveryPersonDetail.userId;
+    const contractId = this.selectedDeliveryPersonDetail.contract.id;
+    let url = '';
+    let payload: any;
+    let successMessage = '';
+
+    if (this.contractModalMode ===  'nuevo') {
+      url = `${this.contractNuevoUrl}/${userId}`;
+      payload = {
+        contractTypeId: formValue.contractTypeId,
+        baseSalary: formValue.baseSalary,
+        commissionPercentage: formValue.commissionPercentage,
+        endDate: formValue.endDate
+      };
+      successMessage = 'Nuevo contrato creado exitosamente.';
+
+    } else if (this.contractModalMode === 'renovar') {
+      url = `${this.contractRenovarUrl}/${contractId}`;
+      payload = { endDate: formValue.endDate };
+      successMessage = 'Contrato renovado exitosamente.';
+    }
+
+    this.http.post<any>(url, payload, { headers }).subscribe({
+      next: () => {
+        this.showAlert('success', successMessage);
+        // Recargar el detalle del repartidor y su contrato
+        this.loadDeliveryPersonContracts(userId, this.selectedEmployee!);
+         this.reloadContractView();
+        this.closeContractModal();
+      },
+      error: (httpError) => {
+        const errors: string[] = this.authService.extractErrorMessages(httpError, `Error al ${this.contractModalMode === 'nuevo' ? 'crear' : 'renovar'} el contrato.`);
+        this.showAlert('danger', errors);
+        this.isLoadingModal = false;
+      }
+    });
+  }
+
+  /**
+   * Cierra el modal de contratos y limpia el estado.
+   */
+  closeContractModal() {
+    this.isContractModalOpen = false;
+    this.contractForm.reset();
+    this.isLoadingModal = false;
+    this.cdr.markForCheck();
+  }
+
 
   // --- Lógica de Envío de Formulario (Creación/Edición) ---
 

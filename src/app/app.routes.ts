@@ -18,6 +18,7 @@ import { AsignacionRepartidor } from './views/repartidor/asignacion/asignacion';
 import { EntregasRepartidor } from './views/repartidor/entregas/entregas';
 import { AsignacionCoordinador } from './views/coordinador/asignacion/asignacion';
 import { IncidenciaCoordinador } from './views/coordinador/incidencias/incidencias';
+import { FidelizacionCoordinador } from './views/coordinador/fidelizacion/fidelizacion';
 import { GuiasCliente } from './views/cliente/guias/guias';
 import { AuthGuard } from './services/auth.guard';
 import { AdminGuard } from './services/adminguard';
@@ -38,6 +39,10 @@ export const routes: Routes = [
   }, {
     path: 'IncidenciaCoordinador',
     component: IncidenciaCoordinador,
+    canActivate: [AuthGuard]
+  },{
+    path: 'FidelizacionCoordinador',
+    component: FidelizacionCoordinador,
     canActivate: [AuthGuard]
   },{
     path: 'afilacion',

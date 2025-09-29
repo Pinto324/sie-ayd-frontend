@@ -161,6 +161,13 @@ export class Dashboard implements OnInit {
         icon: 'hammer',
         route: '/IncidenciaCoordinador',
         roleAccess: [4]
+      },{
+        id: 3,
+        title: 'Fidelización',
+        description: 'Modulo monitorear la fidelización de los comercios',
+        icon: 'id-card-clip',
+        route: '/FidelizacionCoordinador',
+        roleAccess: [4]
       },
       {
         id: 2,

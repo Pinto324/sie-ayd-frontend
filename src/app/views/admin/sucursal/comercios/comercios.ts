@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, Input  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -46,7 +46,7 @@ export class Comercios implements OnInit {
   faChartLine = faChartLine;
   faArrowLeft = faArrowLeft;
   commerceForm: FormGroup;
-
+  showActions: boolean = false;
   viewMode: 'table' | 'report' = 'table'; // Define el estado de la vista
   selectedCommerceId: number | null = null; 
   nameCommerceId: string | null = null; 
@@ -73,6 +73,9 @@ export class Comercios implements OnInit {
   }
 
   ngOnInit() {
+    if (this.authService.getRoleId() ==1) { 
+      this.showActions = true;
+    }
     this.loadCommerces();
   }
 
