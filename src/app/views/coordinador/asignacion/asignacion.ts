@@ -210,16 +210,12 @@ export class AsignacionCoordinador implements OnInit {
         this.isAssigning = false;
         this.goBack(); // Volver a la vista principal (Guías Pendientes)
       },
-      error: (error) => {
-        let errors: string[] = ['Ocurrió un error desconocido.'];
-          if (error.error && error.error.errors && Array.isArray(error.error.errors)) {
-          // Si el backend devuelve un array de errores de validación
-          errors = error.error.errors.map((err: any) => err.message || err);
-        } else if (error.error && error.error.message) {
-           // Si el backend devuelve un mensaje de error principal
-           errors = [error.error.message];
-        }
-           this.showAlert('danger', errors);
+      error: (httpError) => {
+        const errors: string[] = this.authService.extractErrorMessages(
+                    httpError, 
+                    'Error al crear empleado. Por favor, intente de nuevo.' // Mensaje por defecto
+                );
+            this.showAlert('danger', errors);
         this.isAssigning = false;
       }
     });
@@ -241,16 +237,12 @@ export class AsignacionCoordinador implements OnInit {
           this.isAssigning = false;
           this.goBack(); // Volver a la vista principal (Guías Pendientes)
         },
-        error: (error) => {
-          let errors: string[] = ['Ocurrió un error desconocido.'];
-          if (error.error && error.error.errors && Array.isArray(error.error.errors)) {
-          // Si el backend devuelve un array de errores de validación
-          errors = error.error.errors.map((err: any) => err.message || err);
-        } else if (error.error && error.error.message) {
-           // Si el backend devuelve un mensaje de error principal
-           errors = [error.error.message];
-        }
-           this.showAlert('danger', errors);
+        error: (httpError) => {
+        const errors: string[] = this.authService.extractErrorMessages(
+                    httpError, 
+                    'Error al crear empleado. Por favor, intente de nuevo.' // Mensaje por defecto
+                );
+            this.showAlert('danger', errors);
           this.isAssigning = false;
         }
       });

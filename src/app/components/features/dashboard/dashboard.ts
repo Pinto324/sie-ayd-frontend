@@ -107,8 +107,15 @@ export class Dashboard implements OnInit {
         id: 1,
         title: 'Solicitud de paquetes',
         description: 'Revisa y controla todos las solicitudes de paquetes que tienes asignadas!.',
-        icon: 'dumpster',
+        icon: 'money-check',
         route: '/asignacionrepartidor',
+        roleAccess: [3]
+      },{
+        id: 2,
+        title: 'Modulo de entregas',
+        description: 'Maneja tu progreso con las entregas que tienes asignadas!',
+        icon: 'boxes-stacked',
+        route: '/entregasrepartidor',
         roleAccess: [3]
       },{
         id: 1,

@@ -1,0 +1,257 @@
+<app-alert 
+  [isOpen]="isAlertModalOpen"
+  [type]="alertType"
+  [message]="alertMessage"
+  (closed)="closeAlertModal()">
+</app-alert>
+<div class="container mx-auto px-4 py-8">
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-black">Manejo de Paquetes Asignados</h1>
+      <p class="text-gray-600 dark:text-black-300 mt-2">Gestiona el flujo de trabajo de tus guías aceptadas (Recolección, Tránsito, Entrega).</p>
+    </div>
+  </div>
+
+  @if (viewMode === 'table') {
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden">
+      @if (isLoading) {
+        <div class="p-6 text-center text-gray-500">Cargando guías aceptadas...</div>
+      } @else if (errorMessage) {
+        <div class="p-6 text-center text-red-500">{{ errorMessage }}</div>
+      } @else if (assignments.length === 0) {
+        <div class="p-6 text-center text-gray-500">No tienes guías aceptadas en tu flujo de trabajo (Status 2, 3 o 4).</div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+              <tr>
+                <th scope="col" class="px-6 py-3">Comercio</th>
+                <th scope="col" class="px-6 py-3">Destinatario</th>
+                <th scope="col" class="px-6 py-3">Dirección</th>
+                <th scope="col" class="px-6 py-3">Teléfono</th>
+                <th scope="col" class="px-6 py-3">Estado Guía</th>
+                <th scope="col" class="px-6 py-3">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of assignments; track item.id) {
+                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                  
+                  <td class="px-6 py-4 font-medium text-gray-900 dark:text-white flex items-center gap-2">
+                    @if (item.guide.commerce.logo) {
+                      <img [src]="item.guide.commerce.logo" class="w-8 h-8 rounded-full object-cover" [alt]="item.guide.commerce.name">
+                    }
+                    {{ item.guide.commerce.name }}
+                  </td>
+                  <td class="px-6 py-4">{{ item.guide.recipient }}</td>
+                  <td class="px-6 py-4">{{ item.guide.address }}</td>
+                  <td class="px-6 py-4">{{ item.guide.phone }}</td>
+                  <td class="px-6 py-4">
+                    <span [class]="{'text-blue-500 font-bold': item.guide.status.id === 2, 'text-orange-500': item.guide.status.id === 3, 'text-purple-500': item.guide.status.id === 4}">
+                      {{ item.guide.status.name }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 flex flex-wrap gap-2">
+                    <button 
+                      (click)="openDetailView(item)"
+                      class="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors flex items-center text-xs">
+                      <fa-icon [icon]="faDetails" class="mr-1"></fa-icon>
+                      Informe
+                    </button>
+                    
+                    @if (item.guide.status.id === 2) {
+                      <button 
+                        (click)="handleWorkStatus(item)"
+                        class="px-3 py-1 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors flex items-center text-xs">
+                        <fa-icon [icon]="faCollected" class="mr-1"></fa-icon>
+                        Recolectada
+                      </button>
+                    } @else if (item.guide.status.id === 3) {
+                      <button 
+                        (click)="handleWorkStatus(item)"
+                        class="px-3 py-1 bg-orange-100 text-orange-600 rounded-lg hover:bg-orange-200 transition-colors flex items-center text-xs">
+                        <fa-icon [icon]="faInTransit" class="mr-1"></fa-icon>
+                        En Tránsito
+                      </button>
+                    } @else if (item.guide.status.id === 4) {
+                      <button 
+                        (click)="openDeliveryModal(item)"
+                        class="px-3 py-1 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors flex items-center text-xs">
+                        <fa-icon [icon]="faDelivered" class="mr-1"></fa-icon>
+                        Finalizar Entrega
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+
+  @if (viewMode === 'detail' && selectedAssignment) {
+    <div class="mb-4">
+      <button 
+        (click)="goBackToTable()"
+        class="flex items-center gap-2 px-4 py-2.5 text-blue-600 rounded-lg hover:bg-gray-100 transition-colors mb-4">
+        <fa-icon [icon]="faBack"></fa-icon>
+        Volver a la Lista de Paquetes
+      </button>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 space-y-6">
+      <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+        Informe de Asignación - Guía #{{ selectedAssignment.guide.code }}
+      </h2>
+      
+      <div class="flex items-center gap-4 border-b pb-4 border-gray-200 dark:border-gray-700">
+        @if (selectedAssignment.guide.commerce.logo) {
+            <img [src]="selectedAssignment.guide.commerce.logo" class="w-16 h-16 rounded-full object-cover" [alt]="selectedAssignment.guide.commerce.name">
+        }
+        <div>
+            <h4 class="text-lg font-bold text-gray-900 dark:text-white">{{ selectedAssignment.guide.commerce.name }}</h4>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Comercio Remitente (NIT: {{ selectedAssignment.guide.commerce.nit }})</p>
+        </div>
+      </div>
+      
+      <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Detalles del Paquete y Destino</h3>
+      <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm text-gray-900 dark:text-gray-300">
+        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+          <dt class="font-medium text-gray-500">Destinatario:</dt><dd>{{ selectedAssignment.guide.recipient }}</dd>
+        </div>
+        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+          <dt class="font-medium text-gray-500">Teléfono Destino:</dt><dd>{{ selectedAssignment.guide.phone }}</dd>
+        </div>
+        <div class="border-b border-gray-100 dark:border-gray-600 pb-2 col-span-1 md:col-span-2">
+          <dt class="font-medium text-gray-500">Dirección de Entrega:</dt><dd>{{ selectedAssignment.guide.address }}</dd>
+        </div>
+        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+          <dt class="font-medium text-gray-500">Precio (a cobrar):</dt><dd class="font-bold">${{ selectedAssignment.guide.price | number: '1.2-2' }}</dd>
+        </div>
+        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+          <dt class="font-medium text-gray-500">Estado Actual:</dt><dd>{{ selectedAssignment.guide.status.name }}</dd>
+        </div>
+        <div class="border-b border-gray-100 dark:border-gray-600 pb-2 col-span-1 md:col-span-2">
+          <dt class="font-medium text-gray-500">Descripción:</dt><dd>{{ selectedAssignment.guide.description || 'N/A' }}</dd>
+        </div>
+      </dl>
+
+      <h3 class="text-xl font-semibold text-gray-900 dark:text-white pt-4">Historial de la Asignación</h3>
+      <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm text-gray-900 dark:text-gray-300">
+        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+          <dt class="font-medium text-gray-500">Guía Creada:</dt><dd>{{ selectedAssignment.guide.createdAt | date:'dd/MM/yyyy - HH:mm' }}</dd>
+        </div>
+        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+          <dt class="font-medium text-gray-500">Asignación Aceptada:</dt><dd>{{ selectedAssignment.acceptedAt | date:'dd/MM/yyyy - HH:mm' }}</dd>
+        </div>
+        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+          <dt class="font-medium text-gray-500">Asignada Por:</dt><dd>{{ selectedAssignment.assignedBy.firstname }} {{ selectedAssignment.assignedBy.lastname }}</dd>
+        </div>
+        <div class="border-b border-gray-100 dark:border-gray-600 pb-2">
+          <dt class="font-medium text-gray-500">Notas del Coordinador:</dt><dd>{{ selectedAssignment.notes || 'Sin notas' }}</dd>
+        </div>
+      </dl>
+
+      <div class="flex justify-end pt-4 gap-3">
+          @if (selectedAssignment.guide.status.id === 2) {
+            <button 
+              (click)="handleWorkStatus(selectedAssignment)"
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+              <fa-icon [icon]="faCollected" class="mr-2"></fa-icon>
+              Marcar como Recolectada
+            </button>
+          } @else if (selectedAssignment.guide.status.id === 3) {
+            <button 
+              (click)="handleWorkStatus(selectedAssignment)"
+              class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors flex items-center">
+              <fa-icon [icon]="faInTransit" class="mr-2"></fa-icon>
+              Marcar como En Tránsito
+            </button>
+          } @else if (selectedAssignment.guide.status.id === 4) {
+            <button 
+              (click)="openDeliveryModal(selectedAssignment)"
+              class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center">
+              <fa-icon [icon]="faDelivered" class="mr-2"></fa-icon>
+              Finalizar Entrega
+            </button>
+          }
+      </div>
+    </div>
+  }
+</div>
+
+
+@if (isDeliveryModalOpen) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700 w-full max-w-lg mx-4">
+      <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+          @if (selectedAssignment) {
+            Finalizar Entrega - Guía #{{ selectedAssignment.guide.code }}
+          } @else {
+            Finalizar Entrega
+          }
+        </h3>
+        <button 
+          (click)="closeDeliveryModal()"
+          type="button" 
+          class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+          <fa-icon [icon]="faTimes"></fa-icon>
+        </button>
+      </div>
+
+      <form (ngSubmit)="submitDelivery()">
+        <div class="p-4 md:p-5 space-y-4">
+            <p class="text-sm text-gray-500 dark:text-gray-400">Adjunte la prueba de entrega (mínimo 1, máximo 3 imagen es) y cualquier nota relevante.</p>
+
+            <div class="space-y-3">
+                <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Evidencia Fotográfica (Archivos de Imagen)</label>
+                @for (fileInput of deliveryFiles; track $index) {
+                    <input 
+                      type="file" 
+                      (change)="onFileSelected($event, $index)"
+                      accept="image/png, image/jpeg, image/jpg"
+                      [required]="$index === 0"
+                      class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                    >
+                }
+                @if (!isFileInputValid()) {
+                    <p class="text-xs text-red-500">Debe ingresar al menos 1 archivo de imagen.</p>
+                }
+            </div>
+
+            <div>
+                <label for="delivery-notes" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Notas de Entrega</label>
+                <textarea 
+                  id="delivery-notes"
+                  [required]="true"
+                  [(ngModel)]="deliveryNotes" 
+                  name="deliveryNotes"
+                  rows="3"
+                  placeholder="Notas sobre la entrega..."
+                  class="w-full p-2.5 rounded-lg border border-gray-300 dark:bg-gray-600 dark:border-gray-500 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                ></textarea>
+            </div>
+        </div>
+
+        <div class="flex justify-end p-4 md:p-5 border-t border-gray-200 dark:border-gray-600">
+          <button 
+            (click)="closeDeliveryModal()"
+            type="button"
+            class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600">
+            Cancelar
+          </button>
+          <button 
+            type="submit"
+            [disabled]="!isFileInputValid()"
+            class="text-white inline-flex items-center bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 disabled:opacity-50">
+            <fa-icon [icon]="faDelivered" class="mr-2"></fa-icon>
+            Confirmar Entrega
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

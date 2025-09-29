@@ -146,16 +146,10 @@ export class AsignacionRepartidor implements OnInit {
         this.loadAssignments(); // Recargar la tabla para reflejar el cambio
       },
       error: (httpError) => {
-        let errors: string[] = ['Ocurrió un error desconocido al cambiar el estado de la asignación'];
-            
-            if (httpError.error && httpError.error.errors && Array.isArray(httpError.error.errors)) {
-                errors = httpError.error.errors.map((err: any) => err.message || err);
-            } else if (httpError.error && httpError.error.message) {
-                errors = [httpError.error.message];
-            } else if (httpError.message) {
-                errors = [httpError.message];
-            }
-
+        const errors: string[] = this.authService.extractErrorMessages(
+                    httpError, 
+                    'Error al crear empleado. Por favor, intente de nuevo.' // Mensaje por defecto
+                );
             this.showAlert('danger', errors);
       }
     });

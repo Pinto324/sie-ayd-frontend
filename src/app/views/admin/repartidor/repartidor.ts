@@ -379,16 +379,10 @@ this.http.post<any>(this.createEmployeeApiUrl, payload, { headers })
         },
         error: (httpError) => {
             this.isLoadingModal = false;
-            let errors: string[] = ['Ocurrió un error desconocido al crear el empleado.'];
-            
-            if (httpError.error && httpError.error.errors && Array.isArray(httpError.error.errors)) {
-                errors = httpError.error.errors.map((err: any) => err.message || err);
-            } else if (httpError.error && httpError.error.message) {
-                errors = [httpError.error.message];
-            } else if (httpError.message) {
-                errors = [httpError.message];
-            }
-
+        const errors: string[] = this.authService.extractErrorMessages(
+                    httpError, 
+                    'Error al crear empleado. Por favor, intente de nuevo.' // Mensaje por defecto
+                );
             this.showAlert('danger', errors);
         }
     });

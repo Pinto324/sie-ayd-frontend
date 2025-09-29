@@ -14,6 +14,7 @@ import { Precios } from './views/admin/precios/precios';
 import { Afilacion } from './views/cliente/afilacion/afilacion';
 import { Guias } from './views/comercios/guias/guias';
 import { AsignacionRepartidor } from './views/repartidor/asignacion/asignacion';
+import { EntregasRepartidor } from './views/repartidor/entregas/entregas';
 import { AsignacionCoordinador } from './views/coordinador/asignacion/asignacion';
 import { GuiasCliente } from './views/cliente/guias/guias';
 import { AuthGuard } from './services/auth.guard';
@@ -47,6 +48,10 @@ export const routes: Routes = [
   }, {
     path: 'guias',
     component: Guias,
+    canActivate: [AuthGuard]
+  },{
+    path: 'entregasrepartidor',
+    component: EntregasRepartidor,
     canActivate: [AuthGuard]
   }, {
     path: 'guiascliente',
